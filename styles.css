@@ -117,6 +117,34 @@ body {
     position: relative;
 }
 
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px dashed #333;
+    white-space: nowrap;
+}
+
+.leaderboard-table th {
+    color: var(--highlight-color);
+    font-weight: bold;
+}
+
+.leaderboard-table tr.highlight {
+    background: #1f1f1f;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+
 .screen-title {
     color: var(--highlight-color);
     border-bottom: 2px solid var(--highlight-color);
@@ -662,6 +690,16 @@ body {
         min-height: 32px;
         padding: 6px 4px;
         font-size: 12px;
+    }
+
+    .leaderboard-table {
+        font-size: 12px;
+        min-width: 520px; /* forces horizontal scroll instead of squish */
+    }
+
+    .leaderboard-table th,
+    .leaderboard-table td {
+        padding: 6px 8px;
     }
 
 
