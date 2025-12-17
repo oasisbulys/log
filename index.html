@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Study OS v1.0</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- JetBrains Mono for v1.1 update -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- v1.2 Cold Start Overlay -->
+    <div id="cold-start-screen" class="cold-start hidden">
+        <div class="boot-sequence">
+            <h1>SYSTEM BOOT SEQUENCE</h1>
+            <div class="boot-info">
+                <p>CHECKING DISK... OK</p>
+                <p>LOADING KERNEL... OK</p>
+                <br>
+                <p>LAST SESSION: <span id="boot-last-session">--</span></p>
+            </div>
+            <button id="btn-cold-start-continue" class="retro-btn large">>> CONTINUE_</button>
+        </div>
+    </div>
+    <div class="crt-overlay"></div>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">STUDY.EXE</div>
+                <button id="mobile-menu-btn" class="retro-btn mobile-only">☰</button>
+            </div>
+
+            <nav id="main-nav" class="nav-menu">
+                <button class="nav-btn active" data-target="home">
+                    <span class="icon">►</span> HOME
+                </button>
+                <button class="nav-btn" data-target="study">
+                    <span class="icon"> </span> STUDY
+                </button>
+                <button class="nav-btn" data-target="quests">
+                    <span class="icon"> </span> QUESTS
+                </button>
+                <button class="nav-btn" data-target="leaderboard">
+                    <span class="icon"> </span> LEADERBOARD
+                </button>
+                <button class="nav-btn" data-target="profile">
+                    <span class="icon"> </span> PROFILE
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <div id="home" class="screen active">
+                <h1 class="screen-title">HOME</h1>
+                <div class="system-line">SYSTEM ONLINE</div>
+            </div>
+
+            <div id="study" class="screen hidden">
+                <h1 class="screen-title">STUDY SESSION</h1>
+                <div class="retro-panel study-panel">
+                    <div class="form-group">
+                        <label>SUBJECT:</label>
+                        <select id="subject-select" class="retro-input">
+                            <option>ALGORITHMS</option>
+                            <option>SYSTEM DESIGN</option>
+                            <option>MATHEMATICS</option>
+                            <option>PHYSICS</option>
+                        </select>
+                    </div>
+
+                    <div class="timer-display">
+                        <span id="timer">00:00:00</span>
+                    </div>
+
+                    <div class="activity-header">
+                        <h3>SYSTEM_LOG</h3>
+                        <button id="btn-post-proof" class="retro-btn outline small" style="border:none; padding:0;">+
+                            create post</button>
+                    </div>
+                    <div class="controls">
+                        <button id="btn-start" class="retro-btn">START</button>
+                        <button id="btn-pause" class="retro-btn" disabled>PAUSE</button>
+                        <button id="btn-end" class="retro-btn" disabled>END</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="quests" class="screen hidden">
+                <h1 class="screen-title">QUEST LOG</h1>
+                <div class="controls-bar">
+                    <button id="btn-create-quest" class="retro-btn">+ NEW QUEST</button>
+                </div>
+                <div id="quests-container" class="quest-list"></div>
+            </div>
+
+            <div id="leaderboard" class="screen hidden">
+                <h1 class="screen-title">LEADERBOARD</h1>
+                <div class="retro-panel table-container">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>USER</th>
+                                <th>XP</th>
+                                <th>HOURS</th>
+                                <th class="hide-mobile">STREAK</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="profile" class="screen hidden">
+                <h1 class="screen-title">USER PROFILE</h1>
+                <div class="retro-panel profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <img src="" alt="Avatar" class="hidden">
+                            <div class="avatar-placeholder"
+                                style="width:100px; height:100px; background:#111; border:1px solid #333; display:flex; align-items:center; justify-content:center; color:#666;">
+                                ?</div>
+                            <input type="file" id="avatar-upload" class="hidden" accept="image/*">
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="profile-username">--</h2>
+                            <p>RANK: <span id="profile-rank">--</span></p>
+                        </div>
+                    </div>
+
+                    <div class="profile-stats-grid">
+                        <div class="stat-item">
+                            <label>TODAY'S STUDY</label>
+                            <span id="profile-study-time">--:--:--</span>
+                        </div>
+                        <div class="stat-item">
+                            <label>CURRENT STREAK</label>
+                            <span id="profile-streak-val">--</span>
+                        </div>
+                        <div class="stat-item">
+                            <label>TOTAL XP</label>
+                            <span id="profile-xp">--</span>
+                        </div>
+                        <div class="stat-item">
+                            <label>TOTAL HOURS</label>
+                            <span id="profile-total-hours">--</span>
+                        </div>
+                    </div>
+
+
+
+
+
+                    <div class="toggle-group">
+                        <label class="retro-checkbox">
+                            <input type="checkbox" id="terminal-mode-toggle">
+                            <span class="checkmark"></span>
+                            ENABLE TERMINAL MODE
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Status Bar -->
+        <footer class="status-bar">
+            <div class="status-item">STATUS: <span id="sys-status">IDLE</span></div>
+            <div class="status-item">XP: <span id="sys-xp">--</span></div>
+            <div class="status-item">STREAK: <span id="sys-streak">--</span></div>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <!-- Create Quest Modal -->
+    <div id="modal-create-quest" class="modal-overlay hidden">
+        <div class="retro-window modal-window">
+            <div class="window-title-bar">
+                <span>NEW_QUEST.EXE</span>
+                <button class="close-modal-btn">X</button>
+            </div>
+            <div class="window-content">
+                <div class="form-group">
+                    <label>QUEST TITLE:</label>
+                    <input type="text" class="retro-input" placeholder="Enter title...">
+                </div>
+                <div class="form-group">
+                    <label>TARGET HOURS:</label>
+                    <input type="number" class="retro-input" placeholder="2">
+                </div>
+                <div class="form-group">
+                    <label>DURATION (DAYS):</label>
+                    <input type="number" class="retro-input" placeholder="1">
+                </div>
+                <div class="modal-actions">
+                    <button class="retro-btn outline close-modal-btn">CANCEL</button>
+                    <button class="retro-btn primary">CREATE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Proof Modal (v1.1) -->
+    <div id="modal-post-proof" class="modal-overlay hidden">
+        <div class="retro-window modal-window">
+            <div class="window-title-bar">
+                <span>POST_PROOF.EXE</span>
+                <button class="close-modal-btn">X</button>
+            </div>
+            <div class="window-content">
+                <form id="form-post-proof">
+                    <div class="form-group">
+                        <label>PROOF TEXT:</label>
+                        <input type="text" id="proof-text" class="retro-input" placeholder="What did you achieve?"
+                            maxlength="120" required>
+                    </div>
+                    <div class="form-group">
+                        <label>IMAGE EVIDENCE:</label>
+                        <input type="file" id="proof-file" class="retro-input" accept="image/*">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="retro-btn outline close-modal-btn">CANCEL</button>
+                        <button type="submit" class="retro-btn primary">UPLOAD</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- v1.4 Auth Modal -->
+    <div id="modal-auth" class="modal-overlay"> <!-- Not hidden by default -->
+        <div class="retro-window modal-window auth-window">
+            <div class="window-title-bar">
+                <span>IDENTITY_VERIFICATION</span>
+            </div>
+            <div class="window-content">
+                <div class="auth-tabs">
+                    <button id="tab-login" class="retro-btn text-btn active">LOGIN</button>
+                    <button id="tab-register" class="retro-btn text-btn">REGISTER</button>
+                </div>
+
+                <form id="form-auth">
+                    <div class="form-group">
+                        <label>USERNAME:</label>
+                        <input type="text" id="auth-username" class="retro-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label>PASSPHRASE:</label>
+                        <input type="password" id="auth-passphrase" class="retro-input" required>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="retro-btn primary full-width">AUTHENTICATE</button>
+                    </div>
+                </form>
+                <div id="auth-error" class="error-msg"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- v1.2 Session Intent Modal -->
+    <div id="modal-session-intent" class="modal-overlay hidden">
+        <div class="retro-window modal-window">
+            <div class="window-title-bar">
+                <span>SESSION_INTENT.EXE</span>
+            </div>
+            <div class="window-content">
+                <form id="form-session-intent">
+                    <div class="form-group">
+                        <label>ACTIVITY TYPE:</label>
+                        <select id="intent-type" class="retro-input" required>
+                            <option value="">-- SELECT --</option>
+                            <option value="REVISION">REVISION</option>
+                            <option value="PROBLEM_SOLVING">PROBLEM SOLVING</option>
+                            <option value="READING">READING</option>
+                            <option value="MOCK_TEST">MOCK TEST</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>NOTE (OPTIONAL):</label>
+                        <input type="text" id="intent-note" class="retro-input" maxlength="50"
+                            placeholder="Specific topic...">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" id="btn-cancel-intent" class="retro-btn outline">CANCEL</button>
+                        <button type="submit" class="retro-btn primary">START SESSION</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- v1.2 Reflection Modal -->
+    <div id="modal-reflection" class="modal-overlay hidden">
+        <div class="retro-window modal-window">
+            <div class="window-title-bar">
+                <span>SESSION_COMPLETE.LOG</span>
+            </div>
+            <div class="window-content" style="text-align: center;">
+                <p style="margin-bottom: 20px;">SESSION COMPLETE.</p>
+                <label style="display:block; margin-bottom:15px; font-weight:bold;">EFFECTIVENESS?</label>
+                <div class="reflection-buttons">
+                    <button class="retro-btn reflection-opt" data-rating="GOOD">[ GOOD ]</button>
+                    <button class="retro-btn reflection-opt" data-rating="OKAY">[ OKAY ]</button>
+                    <button class="retro-btn reflection-opt" data-rating="WASTED">[ WASTED ]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
