@@ -6,9 +6,9 @@
     "node": ">=18"
   },
   "scripts": {
-    "postinstall": "prisma generate",
-    "build": "prisma migrate deploy",
-    "start": "node src/server.js",
+    "postinstall": "npx prisma generate",
+    "build": "echo \"skip db during build\"",
+    "start": "npx prisma migrate deploy && node src/server.js",
     "dev": "nodemon src/server.js"
   },
   "dependencies": {
