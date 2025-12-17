@@ -4,7 +4,7 @@
 
 **Log** is a retro-themed study companion application designed to gamify focus and discipline. With a distinct CRT terminal aesthetic, it combines productivity tools with social accountability features to help you track your study sessions, complete quests, and compete on leaderboards.
 
-![System Boot](https://ibb.co/5WrL7bn4) <!-- Placeholder for a screenshot if available, otherwise just text -->
+![System Boot](https://i.ibb.co/5WrL7bn4/Screenshot-2025-12-18-at-12-34-58-AM.png" alt="Screenshot-2025-12-18-at-12-34-58-AM) <!-- Placeholder for a screenshot if available, otherwise just text -->
 
 ## Features
 
