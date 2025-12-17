@@ -2,10 +2,15 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const { PrismaClient } = require('@prisma/client');
+
 const prisma = new PrismaClient();
 
-// @route   GET /quests
-// @desc    Get all active quests with user progress
+/*
+|--------------------------------------------------------------------------
+| GET /quests
+| Get all quests with user progress
+|--------------------------------------------------------------------------
+*/
 router.get('/', auth, async (req, res) => {
     try {
         const quests = await prisma.quest.findMany({
@@ -16,7 +21,6 @@ router.get('/', auth, async (req, res) => {
             where: { userId: req.user.id }
         });
 
-        // Map progress to quests
         const result = quests.map(q => {
             const userProg = progress.find(p => p.questId === q.id);
             return {
@@ -29,34 +33,85 @@ router.get('/', auth, async (req, res) => {
 
         res.json(result);
     } catch (err) {
-        console.error(err.message);
+        console.error('GET /quests ERROR:', err);
         res.status(500).json({ error: 'Server Error' });
     }
 });
 
-// @route   POST /quests/:id/join
-// @desc    Join a quest
-router.post('/:id/join', auth, async (req, res) => {
+/*
+|--------------------------------------------------------------------------
+| POST /quests
+| Create a new quest  <-- THIS WAS MISSING
+|--------------------------------------------------------------------------
+*/
+router.post('/', auth, async (req, res) => {
     try {
-        const questId = parseInt(req.params.id);
+        const { title, description, target_hours } = req.body;
 
-        const existing = await prisma.questProgress.findUnique({
-            where: {
-                userId_questId: { userId: req.user.id, questId }
+        if (!title || !target_hours || target_hours <= 0) {
+            return res.status(400).json({ error: 'Invalid quest data' });
+        }
+
+        const quest = await prisma.quest.create({
+            data: {
+                title,
+                description: description || title,
+                target_hours,
+                xp_reward: Math.floor(target_hours * 100)
             }
         });
 
-        if (existing) return res.status(400).json({ msg: 'Already joined' });
+        // Activity log
+        await prisma.activityLog.create({
+            data: {
+                userId: req.user.id,
+                type: 'QUEST',
+                text: `created quest: ${quest.title}`
+            }
+        });
+
+        res.json(quest);
+    } catch (err) {
+        console.error('POST /quests ERROR:', err);
+        res.status(500).json({ error: 'Server Error' });
+    }
+});
+
+/*
+|--------------------------------------------------------------------------
+| POST /quests/:id/join
+| Join a quest
+|--------------------------------------------------------------------------
+*/
+router.post('/:id/join', auth, async (req, res) => {
+    try {
+        const questId = parseInt(req.params.id, 10);
+
+        const existing = await prisma.questProgress.findUnique({
+            where: {
+                userId_questId: {
+                    userId: req.user.id,
+                    questId
+                }
+            }
+        });
+
+        if (existing) {
+            return res.status(400).json({ msg: 'Already joined' });
+        }
 
         const progress = await prisma.questProgress.create({
             data: {
                 userId: req.user.id,
-                questId
+                questId,
+                progress_hours: 0
             }
         });
 
-        // Log Activity
-        const quest = await prisma.quest.findUnique({ where: { id: questId } });
+        const quest = await prisma.quest.findUnique({
+            where: { id: questId }
+        });
+
         await prisma.activityLog.create({
             data: {
                 userId: req.user.id,
@@ -67,30 +122,46 @@ router.post('/:id/join', auth, async (req, res) => {
 
         res.json(progress);
     } catch (err) {
-        console.error(err.message);
+        console.error('JOIN QUEST ERROR:', err);
         res.status(500).json({ error: 'Server Error' });
     }
 });
 
-// @route   POST /quests/:id/claim
-// @desc    Claim reward for completed quest
+/*
+|--------------------------------------------------------------------------
+| POST /quests/:id/claim
+| Claim quest reward
+|--------------------------------------------------------------------------
+*/
 router.post('/:id/claim', auth, async (req, res) => {
     try {
-        const questId = parseInt(req.params.id);
+        const questId = parseInt(req.params.id, 10);
+
         const progress = await prisma.questProgress.findUnique({
-            where: { userId_questId: { userId: req.user.id, questId } }
+            where: {
+                userId_questId: {
+                    userId: req.user.id,
+                    questId
+                }
+            }
         });
-        const quest = await prisma.quest.findUnique({ where: { id: questId } });
 
-        if (!progress) return res.status(404).json({ msg: 'Not joined' });
-        if (progress.completed_at) return res.status(400).json({ msg: 'Already claimed' });
+        if (!progress) {
+            return res.status(404).json({ msg: 'Not joined' });
+        }
 
-        // Strict Check: Server-side validation
+        if (progress.completed_at) {
+            return res.status(400).json({ msg: 'Already claimed' });
+        }
+
+        const quest = await prisma.quest.findUnique({
+            where: { id: questId }
+        });
+
         if (progress.progress_hours < quest.target_hours) {
             return res.status(400).json({ msg: 'Quest not complete' });
         }
 
-        // Award
         await prisma.$transaction([
             prisma.questProgress.update({
                 where: { id: progress.id },
@@ -98,7 +169,9 @@ router.post('/:id/claim', auth, async (req, res) => {
             }),
             prisma.user.update({
                 where: { id: req.user.id },
-                data: { xp: { increment: quest.xp_reward } }
+                data: {
+                    xp: { increment: quest.xp_reward }
+                }
             }),
             prisma.activityLog.create({
                 data: {
@@ -109,9 +182,9 @@ router.post('/:id/claim', auth, async (req, res) => {
             })
         ]);
 
-        res.json({ msg: 'Reward Claimed' });
+        res.json({ msg: 'Reward claimed' });
     } catch (err) {
-        console.error(err.message);
+        console.error('CLAIM QUEST ERROR:', err);
         res.status(500).json({ error: 'Server Error' });
     }
 });
