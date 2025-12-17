@@ -42,8 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
         tabRegister: document.getElementById('tab-register'),
 
         // Profile
-        profileRank: document.querySelector('.profile-rank-display'),
-        profileXP: document.getElementById('profile-xp-val'),
+        // Profile
+        profileRank: document.getElementById('profile-rank'),
+        profileXP: document.getElementById('profile-xp'),
         profileAvatar: document.querySelector('.profile-avatar'),
         profileAvatarImg: document.querySelector('.profile-avatar img'),
         avatarInput: document.getElementById('avatar-upload'),
@@ -700,6 +701,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.target.classList.add('hidden');
             }
         });
+
+        // Close Modals (Buttons)
+        document.querySelectorAll('.close-modal-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modal = btn.closest('.modal-overlay');
+                if (modal) modal.classList.add('hidden');
+            });
+        });
+
+        // Create Quest Wire
+        const btnCreateQuest = document.getElementById('btn-create-quest');
+        const modalCreateQuest = document.getElementById('modal-create-quest');
+        if (btnCreateQuest && modalCreateQuest) {
+            btnCreateQuest.addEventListener('click', () => {
+                modalCreateQuest.classList.remove('hidden');
+            });
+        }
     }
 
     function getTimeWindow(date) {
