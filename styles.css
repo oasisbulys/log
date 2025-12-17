@@ -29,6 +29,9 @@ body {
     letter-spacing: -0.5px;
 }
 
+#mobile-menu-btn {
+    display: none;
+}
 
 
 .system-line {
@@ -567,6 +570,22 @@ body {
         padding: 10px 15px;
     }
 
+    .status-bar {
+        height: auto;
+        min-height: 30px;
+        font-size: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 4px 6px;
+    }
+
+    .status-item {
+        border-right: none;
+        padding-right: 0;
+        font-size: 12px;
+    }
+
+
     .mobile-only {
         display: inline-block;
     }
@@ -604,11 +623,23 @@ body {
         padding: 10px
         flex-direction: column;
         gap: 8px;
+        padding: 6px;
     }
 
     #main-nav.open {
-        display: flex;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.6);
     }
+
+
+    #mobile-menu-btn {
+        display: block;
+        font-size: 16px;
+        padding: 4px 8px;
+        width: auto;
+        height: auto;
+        line-height: 1;
+    }
+
 
     .hide-mobile {
         display: none;
