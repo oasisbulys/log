@@ -5,77 +5,80 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
-// @route   POST /sessions/end
-// @desc    End a session (Client sends calculated data for v1 simplicity, though server validation preferred later)
 router.post('/end', auth, async (req, res) => {
-    const { subject, intent, duration, rating, timeWindow } = req.body;
+  try {
+    const {
+      type,
+      note,
+      duration,
+      rating,
+      startTime,
+      timeTag
+    } = req.body;
 
-    // Basic Validation: Ensure meaningful duration
-    if (!duration || duration < 1) {
-        return res.status(400).json({ msg: 'Invalid duration' });
+    // Hard validation
+    if (!duration || duration <= 0) {
+      return res.status(400).json({ error: 'Invalid duration' });
     }
 
-    try {
-        // 1. Create Session Record
-        const session = await prisma.studySession.create({
-            data: {
-                userId: req.user.id,
-                subject: subject || 'General',
-                intent: intent,
-                duration_seconds: duration,
-                time_window: timeWindow
-            }
-        });
+    // 1. Create study session
+    const session = await prisma.studySession.create({
+      data: {
+        user: { connect: { id: req.user.id } },
+        type: type || 'GENERAL',
+        note: note || null,
+        duration_seconds: duration,
+        rating,
+        time_window: timeTag,
+        started_at: new Date(startTime)
+      }
+    });
 
-        // 2. Update User Stats (XP, Streak - mock logic for now)
-        // Simple XP: 1 XP per minute
-        const xpEarned = Math.floor(duration / 60);
-        const hoursEarned = duration / 3600;
+    // 2. XP calculation
+    const xpEarned = Math.floor(duration / 60);
+    const hoursEarned = duration / 3600;
 
-        await prisma.user.update({
-            where: { id: req.user.id },
-            data: {
-                xp: { increment: xpEarned }
-                // Streak logic would go here
-            }
-        });
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        xp: { increment: xpEarned }
+      }
+    });
 
-        // 2a. Update Quest Progress
-        // Find active quests for user
-        const activeProgress = await prisma.questProgress.findMany({
-            where: {
-                userId: req.user.id,
-                completed_at: null
-            }
-        });
+    // 3. Update quest progress
+    const activeQuests = await prisma.questProgress.findMany({
+      where: {
+        userId: req.user.id,
+        completed_at: null
+      }
+    });
 
-        for (const p of activeProgress) {
-            await prisma.questProgress.update({
-                where: { id: p.id },
-                data: { progress_hours: { increment: hoursEarned } }
-            });
+    for (const q of activeQuests) {
+      await prisma.questProgress.update({
+        where: { id: q.id },
+        data: {
+          progress_hours: { increment: hoursEarned }
         }
-
-        // 3. Create Activity Log Entry
-        const hours = Math.floor(duration / 3600);
-        const mins = Math.floor((duration % 3600) / 60);
-        let timeStr = "";
-        if (hours > 0) timeStr += `${hours}h `;
-        timeStr += `${mins}m`;
-
-        await prisma.activityLog.create({
-            data: {
-                userId: req.user.id,
-                type: 'STUDY',
-                text: `completed ${timeStr} – ${intent} (${rating})`
-            }
-        });
-
-        res.json(session);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: 'Server Error' });
+      });
     }
+
+    // 4. Activity log
+    const hours = Math.floor(duration / 3600);
+    const mins = Math.floor((duration % 3600) / 60);
+
+    await prisma.activityLog.create({
+      data: {
+        user: { connect: { id: req.user.id } },
+        type: 'STUDY',
+        text: `completed ${hours > 0 ? `${hours}h ` : ''}${mins}m – ${type} (${rating})`
+      }
+    });
+
+    res.json(session);
+  } catch (err) {
+    console.error('SESSION END ERROR:', err);
+    res.status(500).json({ error: 'Failed to save session' });
+  }
 });
 
 module.exports = router;
