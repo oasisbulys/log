@@ -133,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch(`${API_URL}${endpoint}`, options);
 
             // Critical: Always expect JSON, but handle fallbacks safely
+            const contentType = res.headers.get("content-type");
             let data;
             if (contentType && contentType.indexOf("application/json") !== -1) {
                 data = await res.json();
