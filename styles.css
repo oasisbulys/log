@@ -29,14 +29,7 @@ body {
     letter-spacing: -0.5px;
 }
 
-/* v1.3 Blinking Cursor - REMOVED for restraint */
-/* .cursor-blink deleted */
 
-@keyframes blink {
-    50% {
-        opacity: 0;
-    }
-}
 
 .system-line {
     font-size: 12px;
@@ -496,20 +489,7 @@ body {
     font-family: var(--font-stack);
 }
 
-.blink {
-    animation: blinker 1.5s linear infinite;
-}
 
-@keyframes blinker {
-    50% {
-        opacity: 0;
-    }
-}
-
-/* v1.4 Glitch Effect */
-.glitch-effect {
-    animation: glitch-anim 0.3s infinite;
-}
 
 /* --- v1.5 Visual Polish: CRT Overlay --- */
 .crt-overlay {

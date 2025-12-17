@@ -5,7 +5,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONSULT CONSTANTS ---
-    const API_URL = 'http://localhost:3000';
+    // --- CONSULT CONSTANTS ---
+    const API_URL = 'https://study-app-production-e733.up.railway.app';
 
     // --- STATE MANAGEMENT ---
     const TimerState = {
@@ -133,13 +134,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Critical: Always expect JSON, but handle fallbacks safely
             let data;
-            const contentType = res.headers.get("content-type");
             if (contentType && contentType.indexOf("application/json") !== -1) {
                 data = await res.json();
             } else {
-                // Fallback for disaster scenarios (should be rare with backend fixes)
+                // Fallback for non-JSON responses (e.g. 404 HTML from Vercel/Railway default pages)
                 const text = await res.text();
-                if (!res.ok) throw new Error(text || res.statusText);
+                // If we get HTML but expected an API response, it's likely a wrong path or server crash
+                if (text.startsWith('<')) throw new Error("Remote Server Error (Invalid Response)");
+                throw new Error(text || res.statusText);
             }
 
             if (!res.ok) {
