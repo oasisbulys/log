@@ -5,7 +5,6 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONSULT CONSTANTS ---
-    // --- CONSULT CONSTANTS ---
     const API_URL = 'https://study-app-production-b20a.up.railway.app';
 
     // --- STATE MANAGEMENT ---
@@ -41,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
         tabLogin: document.getElementById('tab-login'),
         tabRegister: document.getElementById('tab-register'),
 
-        // Profile
         // Profile
         profileRank: document.getElementById('profile-rank'),
         profileXP: document.getElementById('profile-xp'),
@@ -521,6 +519,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function getTimeWindow(date) {
+        const hour = date.getHours();
+        if (hour >= 5 && hour < 11) return 'MORNING';
+        if (hour >= 11 && hour < 17) return 'AFTERNOON';
+        return 'NIGHT';
+    }
+
     // --- EVENT BINDING ---
     function bindEvents() {
         if (window.eventsBound) return;
@@ -585,7 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 fd.append('avatar', e.target.files[0]);
                 try {
                     const res = await apiFetch('/me/avatar', 'PUT', fd);
-                    updateProfileUI(res);
+                    hydrateUserUI(res);
                 } catch (err) {
                     alert("Upload Failed: " + err.message);
                 }
@@ -655,7 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Refresh data
                     const user = await apiFetch('/me');
-                    updateProfileUI(user);
+                    hydrateUserUI(user);
                     renderLog();
                 } catch (err) {
                     alert("Failed to save session: " + err.message);
@@ -713,18 +718,46 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create Quest Wire
         const btnCreateQuest = document.getElementById('btn-create-quest');
         const modalCreateQuest = document.getElementById('modal-create-quest');
+
         if (btnCreateQuest && modalCreateQuest) {
             btnCreateQuest.addEventListener('click', () => {
                 modalCreateQuest.classList.remove('hidden');
             });
         }
-    }
 
-    function getTimeWindow(date) {
-        const hour = date.getHours();
-        if (hour >= 5 && hour < 11) return 'MORNING';
-        if (hour >= 11 && hour < 17) return 'AFTERNOON';
-        return 'NIGHT';
+        // Create Quest Submit
+        const formCreateQuest = document.getElementById('form-create-quest');
+
+        if (formCreateQuest) {
+            formCreateQuest.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const title = document.getElementById('quest-title').value.trim();
+                const targetInput = formCreateQuest.querySelector('input[type="number"]');
+                const targetHours = Number(targetInput.value);
+
+                if (!title || targetHours <= 0) {
+                    alert('Invalid quest data');
+                    return;
+                }
+
+                try {
+                    await apiFetch('/quests', 'POST', {
+                        title,
+                        description: title,
+                        target_hours: targetHours
+                    });
+
+                    modalCreateQuest.classList.add('hidden');
+                    formCreateQuest.reset();
+
+                    renderQuests();
+                    renderLog();
+                } catch (err) {
+                    alert('Quest creation failed: ' + err.message);
+                }
+            });
+        }
     }
 
     // --- BOOT ---
