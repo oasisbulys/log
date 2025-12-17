@@ -218,7 +218,7 @@ body {
     /* Ensure fixed width for numbers */
     color: #0f0;
     /* Green terminal phosphor style for timer */
-    text-shadow: 0 0 5px #0f0;
+    text-shadow: 0 0 2px #0f0;
 }
 
 .controls {
@@ -283,14 +283,26 @@ body {
     padding-bottom: 5px;
 }
 
+/* HOME FEED – Full page timeline */
 .activity-log {
-    max-height: 300px;
-    overflow-y: auto;
-    background: #050505;
-    padding: 10px;
-    border: 2px inset #444;
-    /* Retro inset look */
+    max-height: none;
+    overflow: visible;
+    background: transparent;
+    padding: 0;
+    border: none;
 }
+
+#home {
+    width: 100%;
+}
+
+#home .activity-log {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+
 
 /* Profile Stats Grid v1.3 */
 .profile-stats-grid {
@@ -304,12 +316,8 @@ body {
 
 
 .log-item {
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-    border-bottom: 1px dashed #333;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+    padding: 16px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.15);
 }
 
 .log-item:last-child {
