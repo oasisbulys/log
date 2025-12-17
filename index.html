@@ -96,7 +96,11 @@
                 <div class="controls-bar">
                     <button id="btn-create-quest" class="retro-btn">+ NEW QUEST</button>
                 </div>
-                <div id="quests-container" class="quest-list"></div>
+                <div id="quests-container" class="quest-list">
+    <div class="log-item system-hint">
+        SYSTEM: No active quests. Create one to begin.
+    </div>
+</div>
             </div>
 
             <div id="leaderboard" class="screen hidden">
@@ -179,32 +183,48 @@
 
     <!-- Modals -->
     <!-- Create Quest Modal -->
-    <div id="modal-create-quest" class="modal-overlay hidden">
-        <div class="retro-window modal-window">
-            <div class="window-title-bar">
-                <span>NEW_QUEST.EXE</span>
-                <button class="close-modal-btn">X</button>
-            </div>
-            <div class="window-content">
-                <div class="form-group">
-                    <label>QUEST TITLE:</label>
-                    <input type="text" class="retro-input" placeholder="Enter title...">
-                </div>
-                <div class="form-group">
-                    <label>TARGET HOURS:</label>
-                    <input type="number" class="retro-input" placeholder="2">
-                </div>
-                <div class="form-group">
-                    <label>DURATION (DAYS):</label>
-                    <input type="number" class="retro-input" placeholder="1">
-                </div>
-                <div class="modal-actions">
-                    <button class="retro-btn outline close-modal-btn">CANCEL</button>
-                    <button class="retro-btn primary">CREATE</button>
-                </div>
-            </div>
+<div id="modal-create-quest" class="modal-overlay hidden">
+    <div class="retro-window modal-window">
+        <div class="window-title-bar">
+            <span>NEW_QUEST.EXE</span>
+            <button class="close-modal-btn">X</button>
         </div>
+
+        <form id="form-create-quest" class="window-content">
+            <div class="form-group">
+                <label>QUEST TITLE:</label>
+                <input
+                    id="quest-title"
+                    type="text"
+                    class="retro-input"
+                    placeholder="e.g. 20h Deep Work Sprint"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label>TARGET HOURS:</label>
+                <input
+                    id="quest-hours"
+                    type="number"
+                    class="retro-input"
+                    placeholder="10"
+                    min="1"
+                    required
+                >
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="retro-btn outline close-modal-btn">
+                    CANCEL
+                </button>
+                <button type="submit" class="retro-btn primary">
+                    CREATE
+                </button>
+            </div>
+        </form>
     </div>
+</div>
 
     <!-- Post Proof Modal (v1.1) -->
     <div id="modal-post-proof" class="modal-overlay hidden">
