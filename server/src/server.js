@@ -8,8 +8,8 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ CORS FIRST
-app.use(cors({
+// 🔥 CORS — must be FIRST
+const corsOptions = {
   origin: [
     "https://study-app-lemon.vercel.app",
     "http://localhost:3000",
@@ -18,7 +18,12 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
-}));
+};
+
+app.use(cors(corsOptions));
+
+// 🔥 THIS LINE IS WHAT YOU WERE MISSING
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 
