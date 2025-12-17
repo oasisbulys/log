@@ -533,7 +533,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Nav
         dom.navButtons.forEach(btn => {
-            btn.addEventListener('click', () => handleNavigation(btn.dataset.target));
+            btn.addEventListener('click', () => {
+                handleNavigation(btn.dataset.target);
+
+                // Close hamburger menu on mobile
+                if (window.innerWidth <= 768 && dom.mainNav) {
+                    dom.mainNav.classList.remove('open');
+                }
+            });
         });
 
         // Mobile Menu
@@ -542,6 +549,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (dom.mainNav) dom.mainNav.classList.toggle('open');
             });
         }
+
+        // Close mobile menu on window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768 && dom.mainNav) {
+                dom.mainNav.classList.remove('open');
+            }
+        });
 
         // Auth Form
         if (dom.authForm) {
