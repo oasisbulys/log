@@ -5,15 +5,17 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
+/**
+ * POST /sessions/end
+ * Ends a study session and saves it
+ */
 router.post('/end', auth, async (req, res) => {
   try {
     const {
-      type,
-      note,
+      subject,
+      intent,
       duration,
-      rating,
-      startTime,
-      timeTag
+      timeWindow
     } = req.body;
 
     // Hard validation
@@ -24,17 +26,15 @@ router.post('/end', auth, async (req, res) => {
     // 1. Create study session
     const session = await prisma.studySession.create({
       data: {
-        user: { connect: { id: req.user.id } },
-        type: type || 'GENERAL',
-        note: note || null,
+        userId: req.user.id,
+        subject: subject || 'General',
+        intent: intent || 'STUDY',
         duration_seconds: duration,
-        rating,
-        time_window: timeTag,
-        started_at: new Date(startTime)
+        time_window: timeWindow || null
       }
     });
 
-    // 2. XP calculation
+    // 2. XP calculation (1 XP per minute)
     const xpEarned = Math.floor(duration / 60);
     const hoursEarned = duration / 3600;
 
@@ -68,9 +68,9 @@ router.post('/end', auth, async (req, res) => {
 
     await prisma.activityLog.create({
       data: {
-        user: { connect: { id: req.user.id } },
+        userId: req.user.id,
         type: 'STUDY',
-        text: `completed ${hours > 0 ? `${hours}h ` : ''}${mins}m – ${type} (${rating})`
+        text: `completed ${hours > 0 ? `${hours}h ` : ''}${mins}m – ${intent || 'STUDY'}`
       }
     });
 
