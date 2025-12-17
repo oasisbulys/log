@@ -6,7 +6,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONSULT CONSTANTS ---
     // --- CONSULT CONSTANTS ---
-    const API_URL = 'https://study-app-production-e733.up.railway.app';
+    const API_URL = 'study-app-production-b20a.up.railway.app';
 
     // --- STATE MANAGEMENT ---
     const TimerState = {
