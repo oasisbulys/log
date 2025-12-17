@@ -293,6 +293,7 @@ body {
     background: transparent;
     padding: 0;
     border: none;
+    -webkit-overflow-scrolling: touch;
 }
 
 #home {
@@ -611,6 +612,19 @@ body {
         display: block;
     }
 
+    .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #home .activity-log {
+        max-width: 100%;
+        margin: 0;
+        padding: 12px 0;
+    }
+
+
     #main-nav {
         display: none;
         position: absolute;
@@ -620,24 +634,34 @@ body {
         background: var(--panel-bg);
         border-bottom: 2px solid var(--border-light);
         z-index: 10;
-        padding: 10px
         flex-direction: column;
         gap: 8px;
         padding: 6px;
     }
 
     #main-nav.open {
+        display: flex;
         box-shadow: 0 6px 20px rgba(0,0,0,0.6);
     }
 
 
     #mobile-menu-btn {
         display: block;
-        font-size: 16px;
-        padding: 4px 8px;
+        font-size: 14px;
+        padding: 3px 6px;
         width: auto;
         height: auto;
         line-height: 1;
+    }
+
+    .main-content {
+        padding: 12px;
+    }
+
+    .retro-input-mini {
+        min-height: 32px;
+        padding: 6px 4px;
+        font-size: 12px;
     }
 
 
