@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dom.sysStreak) dom.sysStreak.textContent = user.streak || 0;
 
         // Force Stock Avatar
-        dom.profileAvatarImg.src = 'default_avatar.png';
+        dom.profileAvatarImg.src = 'default_avatar.jpeg';
         dom.profileAvatarImg.classList.remove('hidden');
         const placeholder = document.querySelector('.avatar-placeholder');
         if (placeholder) placeholder.classList.add('hidden');
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('article');
                 card.className = 'feed-card';
 
-                const avatar = `<img src="default_avatar.png" class="feed-avatar">`;
+                const avatar = `<img src="default_avatar.jpeg" class="feed-avatar">`;
 
                 const image = log.image_url
                     ? `<img src="${API_URL}${log.image_url}" class="feed-image">`
