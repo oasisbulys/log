@@ -3,7 +3,6 @@
     --panel-bg: #1a1a1a;
     --text-color: #c0c0c0;
     --accent-color: #008080;
-    /* Teal like Windows 95 desktop or similar retro feel */
     --highlight-color: #ffffff;
     --border-light: #444;
     --border-dark: #000;
@@ -25,14 +24,12 @@ body {
     height: 100vh;
     overflow: hidden;
     font-size: 14px;
-    /* Adjusted for JetBrains Mono */
     letter-spacing: -0.5px;
 }
 
 #mobile-menu-btn {
     display: none;
 }
-
 
 .system-line {
     font-size: 12px;
@@ -144,7 +141,6 @@ body {
     overflow-x: auto;
 }
 
-
 .screen-title {
     color: var(--highlight-color);
     border-bottom: 2px solid var(--highlight-color);
@@ -169,10 +165,8 @@ body {
     border-right-color: #000;
     border-bottom-color: #000;
     padding: 5px 10px;
-    /* Reduced Padding */
     font-family: var(--font-stack);
     font-size: 13px;
-    /* Reduced Font Size */
     cursor: pointer;
 }
 
@@ -233,11 +227,13 @@ body {
 
 .progress-bar {
     height: 100%;
-    background: repeating-linear-gradient(45deg,
-            var(--text-color),
-            var(--text-color) 10px,
-            #999 10px,
-            #999 20px);
+    background: repeating-linear-gradient(
+        45deg,
+        var(--text-color),
+        var(--text-color) 10px,
+        #999 10px,
+        #999 20px
+    );
 }
 
 /* Study Screen */
@@ -246,9 +242,7 @@ body {
     font-size: 80px;
     margin: 40px 0;
     font-family: monospace;
-    /* Ensure fixed width for numbers */
     color: #0f0;
-    /* Green terminal phosphor style for timer */
     text-shadow: 0 0 2px #0f0;
 }
 
@@ -300,7 +294,7 @@ body {
     padding-right: 20px;
 }
 
-/* Activity Log (v1.1) */
+/* Activity Section */
 .activity-section {
     margin-top: 30px;
 }
@@ -314,29 +308,11 @@ body {
     padding-bottom: 5px;
 }
 
-/* HOME FEED – Full page timeline */
-.activity-log {
-    max-height: none;
-    overflow: visible;
-    background: transparent;
-    padding: 0;
-    border: none;
-    -webkit-overflow-scrolling: touch;
-}
-
 #home {
     width: 100%;
 }
 
-#home .activity-log {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-
-
-/* Profile Stats Grid v1.3 */
+/* Profile Stats Grid */
 .profile-stats-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -344,17 +320,6 @@ body {
     margin: 20px 0;
     border-top: 1px dashed #444;
     padding-top: 20px;
-}
-
-
-.log-item {
-    padding: 16px 0;
-    border-bottom: 1px dashed rgba(255,255,255,0.15);
-}
-
-.log-item:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
 }
 
 .log-meta {
@@ -424,7 +389,6 @@ body {
     height: auto;
     display: block;
     filter: grayscale(100%) contrast(1.2);
-    /* v1.1 Rule: Grayscale + Contrast */
 }
 
 /* Modals */
@@ -454,7 +418,6 @@ body {
 
 .window-title-bar {
     background: blue;
-    /* Windows title bar blue */
     color: white;
     padding: 2px 5px;
     display: flex;
@@ -495,43 +458,7 @@ body {
     margin-top: 20px;
 }
 
-/* v1.2 Cold Start Overlay */
-.cold-start {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #000;
-    z-index: 9999;
-    /* Highest priority */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-
-.boot-sequence {
-    text-align: center;
-    color: var(--highlight-color);
-}
-
-.boot-sequence h1 {
-    font-size: 32px;
-    margin-bottom: 40px;
-    border-bottom: 2px dashed var(--highlight-color);
-    padding-bottom: 10px;
-}
-
-.boot-info {
-    text-align: left;
-    margin-bottom: 40px;
-    font-family: var(--font-stack);
-}
-
-
-
-/* --- v1.5 Visual Polish: CRT Overlay --- */
+/* CRT Overlay */
 .crt-overlay {
     position: fixed;
     top: 0;
@@ -551,29 +478,24 @@ body {
     0% {
         opacity: 0.97;
     }
-
     5% {
         opacity: 0.95;
     }
-
     10% {
         opacity: 0.9;
     }
-
     15% {
         opacity: 0.95;
     }
-
     20% {
         opacity: 1;
     }
-
     100% {
         opacity: 0.98;
     }
 }
 
-/* v1.2 Reflection Buttons */
+/* Reflection Buttons */
 .reflection-buttons {
     display: flex;
     flex-direction: column;
@@ -586,24 +508,8 @@ body {
     text-align: center;
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-    body {
-        font-size: 12px;
-        letter-spacing: -0.3px;
-        /* Slightly tighter for small text */
-    }
-
-    .retro-btn {
-        font-size: 13px;
-        padding: 10px 15px;
-    }
-
-    .activity-log {
-        padding: 8px 12px;
-    }
-
-    .home-header {
+/* Home Feed */
+.home-header {
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
@@ -630,7 +536,7 @@ body {
     background: linear-gradient(180deg, #141414, #0f0f0f);
     border-radius: 14px;
     padding: 16px;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .feed-header {
@@ -691,6 +597,18 @@ body {
     color: #ffffff;
 }
 
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    body {
+        font-size: 12px;
+        letter-spacing: -0.3px;
+    }
+
+    .retro-btn {
+        font-size: 13px;
+        padding: 10px 15px;
+    }
+
     .status-bar {
         height: auto;
         min-height: 30px;
@@ -707,17 +625,8 @@ body {
         font-size: 12px;
     }
 
-
     .mobile-only {
         display: inline-block;
-    }
-
-    .log-item {
-        padding: 14px 0;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
     }
 
     .comments-list {
@@ -726,7 +635,7 @@ body {
 
     .log-meta {
         font-size: 11px;
-        colour:#777;
+        color: #777;
         opacity: 0.6;
         margin-bottom: 4px;
     }
@@ -737,7 +646,7 @@ body {
         font-size: 14px;
     }
 
-    .log-image-container{
+    .log-image-container {
         max-width: 100%;
         margin: 8px 0;
         border: none;
@@ -750,7 +659,7 @@ body {
 
     .log-actions {
         margin-top: 6px;
-        font-size: 12x;
+        font-size: 12px;
         color: #888;
         padding-top: 4px;
     }
@@ -773,22 +682,11 @@ body {
         display: block;
     }
 
-    .log-item:not(:first-child) {
-        margin-top: 6px;
-    }
-
     .sidebar-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
-
-    #home .activity-log {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 12px 0;
-    }
-
 
     #main-nav {
         display: none;
@@ -806,9 +704,8 @@ body {
 
     #main-nav.open {
         display: flex;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
     }
-
 
     #mobile-menu-btn {
         display: block;
@@ -836,14 +733,13 @@ body {
 
     .leaderboard-table {
         font-size: 12px;
-        min-width: 520px; /* forces horizontal scroll instead of squish */
+        min-width: 520px;
     }
 
     .leaderboard-table th,
     .leaderboard-table td {
         padding: 6px 8px;
     }
-
 
     .hide-mobile {
         display: none;
