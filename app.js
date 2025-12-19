@@ -64,10 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnPause: document.getElementById('btn-pause'),
         btnEnd: document.getElementById('btn-end'),
 
-        // Footer Status
-        statusDisplay: document.getElementById('sys-status'),
-        sysXP: document.getElementById('sys-xp'),
-        sysStreak: document.getElementById('sys-streak'),
 
         // Modals
         modalIntent: document.getElementById('modal-session-intent'),
@@ -177,12 +173,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dom.profileToday) dom.profileToday.textContent = `${user.today_hours || '0.0'}h`;
         if (dom.profileTotal) dom.profileTotal.textContent = user.total_hours || '0.0';
 
-        // Footer Stats
-        if (dom.sysXP) dom.sysXP.textContent = (user.xp || 0).toLocaleString();
-        if (dom.sysStreak) dom.sysStreak.textContent = user.streak || 0;
 
         // Force Stock Avatar
-        dom.profileAvatarImg.src = 'default_avatar.jpeg';
+        dom.profileAvatarImg.src = 'default_avatar.png';
         dom.profileAvatarImg.classList.remove('hidden');
         const placeholder = document.querySelector('.avatar-placeholder');
         if (placeholder) placeholder.classList.add('hidden');
@@ -205,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('article');
                 card.className = 'feed-card';
 
-                const avatar = `<img src="default_avatar.jpeg" class="feed-avatar">`;
+                const avatar = `<img src="default_avatar.png" class="feed-avatar">`;
 
                 const image = log.image_url
                     ? `<img src="${API_URL}${log.image_url}" class="feed-image">`
