@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         authError: document.getElementById('auth-error'),
         tabLogin: document.getElementById('tab-login'),
         tabRegister: document.getElementById('tab-register'),
+        authSubmitBtn: null, // Cached later after form is available
 
         feed: document.getElementById('activity-feed'),
 
@@ -460,6 +461,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function bindEvents() {
+        // Cache auth submit button
+        dom.authSubmitBtn = dom.authForm?.querySelector('button[type="submit"]');
+
         dom.navButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 switchScreen(btn.dataset.target);
@@ -470,11 +474,13 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.tabLogin?.addEventListener('click', () => {
             dom.tabLogin.classList.add('active');
             dom.tabRegister.classList.remove('active');
+            if (dom.authSubmitBtn) dom.authSubmitBtn.textContent = 'AUTHENTICATE';
         });
 
         dom.tabRegister?.addEventListener('click', () => {
             dom.tabRegister.classList.add('active');
             dom.tabLogin.classList.remove('active');
+            if (dom.authSubmitBtn) dom.authSubmitBtn.textContent = 'REGISTER';
         });
 
         dom.mobileMenuBtn?.addEventListener('click', () => {
@@ -496,6 +502,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.token = res.token;
                 localStorage.setItem('token', res.token);
                 dom.authModal.classList.add('hidden');
+
+                // Reset to login mode after successful auth
+                dom.tabLogin.classList.add('active');
+                dom.tabRegister.classList.remove('active');
+                if (dom.authSubmitBtn) dom.authSubmitBtn.textContent = 'AUTHENTICATE';
+
                 initializeSystem(res.user);
             } catch (err) {
                 dom.authError.textContent = err.message;
