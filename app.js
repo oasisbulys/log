@@ -61,6 +61,76 @@ document.addEventListener('DOMContentLoaded', () => {
         feedContainer: document.getElementById('activity-feed')
     };
 
+
+    async function renderQuests() {
+    const container = document.getElementById('quests-container');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    try {
+        const quests = await apiFetch('/quests');
+
+        if (!quests.length) {
+            container.innerHTML =
+                '<div class="retro-panel quest-box"><p>No active quests.</p></div>';
+            return;
+        }
+
+        quests.forEach(q => {
+            const pct = Math.min(100, (q.progress_hours / q.target_hours) * 100);
+
+            const el = document.createElement('div');
+            el.className = 'retro-panel quest-box';
+            el.innerHTML = `
+                <h3>${q.title}</h3>
+                <p>${q.description}</p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width:${pct}%;"></div>
+                </div>
+                <p style="font-size:12px">${q.progress_hours.toFixed(1)} / ${q.target_hours}h</p>
+            `;
+            container.appendChild(el);
+        });
+    } catch (err) {
+        container.in
+
+
+    async function renderLeaderboard() {
+    const tbody = document.getElementById('leaderboard-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    try {
+        const users = await apiFetch('/leaderboard');
+
+        if (!users.length) {
+            tbody.innerHTML =
+                '<tr><td colspan="5">Leaderboard unavailable</td></tr>';
+            return;
+        }
+
+        users.forEach(u => {
+            const tr = document.createElement('tr');
+            if (u.is_current_user) tr.classList.add('highlight');
+
+            tr.innerHTML = `
+                <td>${u.rank}</td>
+                <td>${u.username}${u.is_current_user ? ' (YOU)' : ''}</td>
+                <td>${u.xp || 0}</td>
+                <td>${u.total_hours || '0.0'}h</td>
+                <td class="hide-mobile">${u.streak || 0}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (err) {
+        tbody.innerHTML =
+            '<tr><td colspan="5">Error loading leaderboard</td></tr>';
+    }
+}
+
+        
     async function apiFetch(endpoint, method = 'GET', body = null) {
         const headers = {};
         if (state.token) headers['x-auth-token'] = state.token;
