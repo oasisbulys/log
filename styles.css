@@ -737,105 +737,115 @@ body {
         padding: 6px 8px;
     }
 
-    .hide-mobile {
-        display: none;
+    .timer-display {
+        font-size: 50px;
     }
+}
 
+/* Profile Avatar Fix */
+.profile-avatar-container {
+    margin-right: 30px;
+    flex-shrink: 0;
+}
 
-    /* Profile Avatar Fix */
-    .profile-avatar-container {
-        margin-right: 30px;
-        flex-shrink: 0;
-    }
+.profile-avatar-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #333;
+    /* Gradient border simulation placeholder */
+    padding: 2px;
+    /* Gap for border */
+    background: #000;
+}
 
-    .profile-avatar-img {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #333;
-        /* Gradient border simulation placeholder */
-        padding: 2px;
-        /* Gap for border */
-        background: #000;
-    }
+/* New Profile Layout */
+.profile-header-new {
+    display: flex;
+    align-items: flex-start;
+    padding-bottom: 20px;
+}
 
-    /* New Profile Layout */
+.profile-info-new {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+.profile-top-row {
+    display: flex;
+    align-items: center;
+    /* justify-content: center; User asked to center username, but standard layout is left.
+       However, removing the star and centering just the text might be what they mean or centering the WHOLE row?
+       "center the username" creates ambiguity if stats are left aligned.
+       I will assume they want the username row centered relative to the profile info block?
+       Or aligned left?
+       Let's keep it left for now as per "Instagram style" effectively, but maybe they felt it looked weird?
+       Wait, if I remove the star, it's just text.
+       I'll add text-align: center to the H2 itself if needed, but flex gap handles alignment.
+       Let's stick to the un-nesting first which fixes the visual bugs.
+       I will set margin-bottom: 5px on the username to space it out nicely.
+    */
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.profile-top-row h2 {
+    font-size: 24px;
+    margin: 0;
+    font-weight: 500;
+}
+
+.profile-stats-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    font-size: 15px;
+}
+
+.stat-pill span:not(.stat-num) {
+    color: #888;
+}
+
+.stat-num {
+    font-weight: bold;
+    color: #fff;
+}
+
+.profile-bio {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.profile-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
     .profile-header-new {
-        display: flex;
-        align-items: flex-start;
-        padding-bottom: 20px;
-    }
-
-    .profile-info-new {
-        flex-grow: 1;
-        display: flex;
         flex-direction: column;
-        justify-content: center;
-        padding-top: 10px;
-    }
-
-    .profile-top-row {
-        display: flex;
         align-items: center;
-        gap: 10px;
-        margin-bottom: 12px;
+        text-align: center;
     }
 
-    .profile-top-row h2 {
-        font-size: 24px;
-        margin: 0;
-        font-weight: 500;
+    .profile-avatar-container {
+        margin-right: 0;
+        margin-bottom: 15px;
     }
 
     .profile-stats-row {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 15px;
-        font-size: 15px;
-    }
-
-    .stat-pill span:not(.stat-num) {
-        color: #888;
-    }
-
-    .stat-num {
-        font-weight: bold;
-        color: #fff;
-    }
-
-    .profile-bio {
-        font-size: 14px;
-        line-height: 1.4;
-    }
-
-    .profile-actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-top: 10px;
-    }
-
-    .full-width {
-        width: 100%;
-    }
-
-    @media (max-width: 768px) {
-        .profile-header-new {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .profile-avatar-container {
-            margin-right: 0;
-            margin-bottom: 15px;
-        }
-
-        .profile-stats-row {
-            justify-content: center;
-            font-size: 13px;
-            gap: 15px;
-        }
+        justify-content: center;
+        font-size: 13px;
+        gap: 15px;
     }
 }
