@@ -8,36 +8,31 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 /* =========================
-   ✅ CORS — PRODUCTION SAFE
+    CORS — DOMAIN SAFE
    ========================= */
 
-const allowedOrigins = [
-    "https://study-app-lemon.vercel.app",
-    "https://uncertanity.com",
-    "https://www.uncertanity.com"
-];
+const allowedOrigins = new Set([
+    'https://study-app-lemon.vercel.app',
+    'https://uncertanity.com',
+    'https://www.uncertanity.com'
+]);
 
-app.use(cors({
-    origin: function (origin, callback) {
-        // Allow server-to-server, Postman, curl
-        if (!origin) return callback(null, true);
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
 
-        if (allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
+    if (allowedOrigins.has(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-auth-token');
+    }
 
-        return callback(
-            new Error(`CORS blocked for origin: ${origin}`),
-            false
-        );
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "x-auth-token"],
-    credentials: false
-}));
+    // Handle preflight
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(204);
+    }
 
-// Explicit preflight handling
-app.options('*', cors());
+    next();
+});
 
 /* =========================
    Middleware
@@ -76,7 +71,7 @@ app.get('/', (req, res) => {
    ========================= */
 
 app.use((err, req, res, next) => {
-    console.error('SERVER ERROR:', err.message);
+    console.error('SERVER ERROR:', err);
     res.status(500).json({ error: 'Internal Server Error' });
 });
 
