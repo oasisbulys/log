@@ -761,18 +761,46 @@ body {
 }
 
 /* New Profile Layout */
-.profile-header-new {
-    display: flex;
-    align-items: flex-start;
-    padding-bottom: 20px;
-}
-
 .profile-info-new {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    /* Vertical center */
     padding-top: 10px;
+    align-items: center;
+    /* Horizontal center (Username, Stats, Bio) */
+    text-align: center;
+}
+
+/* User asked to "center the username".
+   If the container is flex-col, I can self-align the row.
+   But if they want it truly centered relative to the block, they might mean text alignment?
+   Actually, looking at the previous user message: "center the username remove that [star]".
+   Maybe they mean vertical alignment with the avatar?
+   "justify-content: center" on .profile-info-new handles vertical centering relative to the avatar height.
+   
+   Wait, the user said "username is not centered".
+   If flex-direction is column, cross axis is horizontal.
+   So "align-items: center" would center it horizontally.
+   "justify-content: center" centers it vertically.
+   
+   Let's assume they want the Username text centered horizontally in its own container?
+   Or centered relative to the avatar?
+   
+   If I look at my previous CSS:
+   .profile-header-new { align-items: flex-start; }
+   This puts the info block at the TOP of the avatar.
+   Detailed fix:
+   1. align-items: center on .profile-header-new to vertically center the info block with the avatar.
+   2. ensure .profile-info-new has justify-content: center.
+*/
+
+.profile-header-new {
+    display: flex;
+    align-items: center;
+    /* Vertically center the info block with the avatar */
+    padding-bottom: 20px;
 }
 
 .profile-top-row {
