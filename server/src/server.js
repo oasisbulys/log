@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 /* =========================
-   CORS — FINAL & CORRECT
+   CORS — FINAL, DYNAMIC
    ========================= */
 
 const allowedOrigins = new Set([
@@ -19,9 +19,9 @@ const allowedOrigins = new Set([
 app.use((req, res, next) => {
     const origin = req.headers.origin;
 
-    if (origin && allowedOrigins.has(origin)) {
+    if (allowedOrigins.has(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
-        res.setHeader('Vary', 'Origin'); // critical for caches
+        res.setHeader('Vary', 'Origin'); // VERY important
         res.setHeader(
             'Access-Control-Allow-Methods',
             'GET,POST,PUT,DELETE,OPTIONS'
@@ -33,7 +33,6 @@ app.use((req, res, next) => {
         res.setHeader('Access-Control-Allow-Credentials', 'true');
     }
 
-    // Handle preflight cleanly
     if (req.method === 'OPTIONS') {
         return res.sendStatus(204);
     }
@@ -52,7 +51,6 @@ app.use(express.json());
    ========================= */
 
 const uploadsDir = path.join(__dirname, '../uploads');
-
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -75,7 +73,7 @@ app.get('/', (req, res) => {
 });
 
 /* =========================
-   Global Error Handler
+   Error Handler
    ========================= */
 
 app.use((err, req, res, next) => {
@@ -87,8 +85,7 @@ app.use((err, req, res, next) => {
    Boot
    ========================= */
 
-console.log('DEPLOY VERSION:', Date.now());
-
 app.listen(PORT, () => {
+    console.log('DEPLOY VERSION:', Date.now());
     console.log(`SYSTEM ONLINE. LISTENING ON PORT ${PORT}`);
 });
