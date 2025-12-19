@@ -5,7 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONSULT CONSTANTS ---
-    const API_URL = 'log-production-449f.up.railway.app';
+    const API_URL = 'https://log-production-449f.up.railway.app';
 
     // --- STATE MANAGEMENT ---
     const TimerState = {
