@@ -57,9 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
         formPostProof: document.getElementById('form-post-proof'),
         btnPostProof: document.getElementById('btn-post-proof'),
 
-        coldStart: document.getElementById('cold-start-screen'),
-        btnColdStart: document.getElementById('btn-cold-start-continue'),
-
         // HOME FEED
         feedContainer: document.getElementById('activity-feed')
     };
@@ -179,13 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function runColdStart() {
-        dom.coldStart.classList.remove('hidden');
-        dom.btnColdStart.addEventListener('click', () => {
-            dom.coldStart.classList.add('hidden');
-            checkAuth();
-        }, { once: true });
-    }
 
     function bindEvents() {
         dom.navButtons.forEach(btn => {
@@ -198,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function init() {
         bindEvents();
-        runColdStart();
+        checkAuth();
     }
 
     init();
