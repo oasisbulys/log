@@ -466,6 +466,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+        // Auth Tabs
+        dom.tabLogin?.addEventListener('click', () => {
+            dom.tabLogin.classList.add('active');
+            dom.tabRegister.classList.remove('active');
+        });
+
+        dom.tabRegister?.addEventListener('click', () => {
+            dom.tabRegister.classList.add('active');
+            dom.tabLogin.classList.remove('active');
+        });
+
         dom.mobileMenuBtn?.addEventListener('click', () => {
             dom.mainNav?.classList.toggle('open');
         });
