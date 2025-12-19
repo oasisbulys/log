@@ -532,11 +532,17 @@ body {
     margin-bottom: 10px;
 }
 
+/* Avatar Feed Styles */
 .feed-avatar {
     width: 42px;
     height: 42px;
+    min-width: 42px;
+    /* Prevent squishing */
     border-radius: 50%;
     object-fit: cover;
+    background-color: #333;
+    /* Fallback bg */
+    border: 1px solid #333;
 }
 
 .feed-user {
