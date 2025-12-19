@@ -11,19 +11,6 @@
 </head>
 
 <body>
-    <!-- v1.2 Cold Start Overlay -->
-    <div id="cold-start-screen" class="cold-start hidden">
-        <div class="boot-sequence">
-            <h1>SYSTEM BOOT SEQUENCE</h1>
-            <div class="boot-info">
-                <p>CHECKING DISK... OK</p>
-                <p>LOADING KERNEL... OK</p>
-                <br>
-                <p>LAST SESSION: <span id="boot-last-session">--</span></p>
-            </div>
-            <button id="btn-cold-start-continue" class="retro-btn large">>> CONTINUE_</button>
-        </div>
-    </div>
     <div class="crt-overlay"></div>
     <div class="app-container">
         <!-- Sidebar -->
@@ -56,9 +43,10 @@
         <main class="main-content">
 
             <div id="home" class="screen active">
-                <h1 class="screen-title">HOME</h1>
-                <div class="system-line">SYSTEM ONLINE</div>
-                <div id="activity-log-container" class="activity-log"></div>
+                <div class="home-header">
+                    <h1 class="screen-title">HOME</h1>
+                </div>
+                <div id="activity-feed" class="activity-feed"></div>
             </div>
 
             <div id="study" class="screen hidden">
