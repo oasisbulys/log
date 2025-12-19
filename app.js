@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             status: TimerState.IDLE,
             intervalId: null,
             seconds: 0,
-            sessionData: null
+            sessionData: null // { type, note, startTime, timeTag }
         }
     };
 
@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         feed: document.getElementById('activity-feed'),
 
+        // Profile
         profileRank: document.getElementById('profile-rank'),
         profileXP: document.getElementById('profile-xp'),
         profileUsername: document.getElementById('profile-username'),
@@ -52,6 +53,38 @@ document.addEventListener('DOMContentLoaded', () => {
         profileAvatarImg: document.querySelector('.profile-avatar img'),
         avatarInput: document.getElementById('avatar-upload'),
 
+        // Profile Extended Stats
+        profileStreak: document.getElementById('profile-streak-val'),
+        profileToday: document.getElementById('profile-study-time'),
+        profileTotal: document.getElementById('profile-total-hours'),
+
+        // Timer
+        timerDisplay: document.getElementById('timer'),
+        btnStart: document.getElementById('btn-start'),
+        btnPause: document.getElementById('btn-pause'),
+        btnEnd: document.getElementById('btn-end'),
+
+        // Footer Status
+        statusDisplay: document.getElementById('sys-status'),
+        sysXP: document.getElementById('sys-xp'),
+        sysStreak: document.getElementById('sys-streak'),
+
+        // Modals
+        modalIntent: document.getElementById('modal-session-intent'),
+        formIntent: document.getElementById('form-session-intent'),
+        btnCancelIntent: document.getElementById('btn-cancel-intent'),
+        modalReflection: document.getElementById('modal-reflection'),
+        reflectionBtns: document.querySelectorAll('.reflection-opt'),
+
+        modalCreateQuest: document.getElementById('modal-create-quest'),
+        formCreateQuest: document.getElementById('form-create-quest'),
+        btnCreateQuest: document.getElementById('btn-create-quest'),
+
+        // Features
+        leaderboardBody: document.getElementById('leaderboard-body'),
+        questsContainer: document.getElementById('quests-container'),
+
+        // Post Proof
         btnPostProof: document.getElementById('btn-post-proof'),
         modalPostProof: document.getElementById('modal-post-proof'),
         formPostProof: document.getElementById('form-post-proof')
@@ -135,9 +168,18 @@ document.addEventListener('DOMContentLoaded', () => {
     ========================= */
 
     function hydrateUserUI(user) {
+        if (!user) return;
         dom.profileUsername.textContent = user.username;
         dom.profileRank.textContent = user.rank || 'NOVICE';
-        dom.profileXP.textContent = user.xp || 0;
+        dom.profileXP.textContent = (user.xp || 0).toLocaleString();
+
+        if (dom.profileStreak) dom.profileStreak.textContent = `${user.streak || 0} Days`;
+        if (dom.profileToday) dom.profileToday.textContent = `${user.today_hours || '0.0'}h`;
+        if (dom.profileTotal) dom.profileTotal.textContent = user.total_hours || '0.0';
+
+        // Footer Stats
+        if (dom.sysXP) dom.sysXP.textContent = (user.xp || 0).toLocaleString();
+        if (dom.sysStreak) dom.sysStreak.textContent = user.streak || 0;
 
         if (user.avatar_url) {
             dom.profileAvatarImg.src = `${API_URL}${user.avatar_url}`;
@@ -151,42 +193,236 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function renderFeed() {
         dom.feed.innerHTML = '';
-
         try {
             const logs = await apiFetch('/activity');
-
             if (!logs.length) {
-                dom.feed.innerHTML =
-                    `<div class="feed-empty">No posts yet.</div>`;
+                dom.feed.innerHTML = `<div class="feed-empty">No posts yet.</div>`;
                 return;
             }
 
             logs.forEach(log => {
                 const card = document.createElement('article');
-                card.className = 'feed-card';
+                card.className = 'feed-card'; // Reuse app.js styling class if possible, or adapt styling
 
-                const avatar = log.user.avatar_url
-                    ? `${API_URL}${log.user.avatar_url}`
-                    : '';
+                // Fallback valid avatar or generated color
+                let avatarHtml = '';
+                if (log.user?.avatar_url) {
+                    avatarHtml = `<img src="${API_URL}${log.user.avatar_url}" class="feed-avatar">`;
+                } else {
+                    avatarHtml = `<div class="feed-avatar" style="background:${stringToColor(log.user?.username)}; display:flex; align-items:center; justify-content:center; color:white; font-size:12px;">${(log.user?.username || '?')[0].toUpperCase()}</div>`;
+                }
 
-                const image = log.image_url
-                    ? `<img src="${API_URL}${log.image_url}" class="feed-image">`
-                    : '';
+                const imageHtml = log.image_url ?
+                    `<div class="feed-image-container"><img src="${API_URL}${log.image_url}" class="feed-image"></div>` : '';
+
+                // Comments
+                const commentsHtml = log.comments ? log.comments.map(c =>
+                    `<div class="comment-item">
+                        <span class="comment-user">${c.user.username}</span> ${escapeHtml(c.text)}
+                    </div>`
+                ).join('') : '';
 
                 card.innerHTML = `
                     <div class="feed-header">
-                        ${avatar ? `<img src="${avatar}" class="feed-avatar">` : ''}
-                        <div class="feed-user">${log.user.username}</div>
+                        ${avatarHtml}
+                        <div class="feed-meta">
+                            <div class="feed-user">${log.user?.username || 'Unknown'}</div>
+                            <div class="feed-time">${timeAgo(new Date(log.created_at))}</div>
+                        </div>
                     </div>
-                    <div class="feed-text">${log.text}</div>
-                    ${image}
-                `;
+                    <div class="feed-text">${escapeHtml(log.text)}</div>
+                    ${imageHtml}
+                    
+                     <div class="feed-actions">
+                        <button class="action-btn" title="Like"><i class="uil uil-heart"></i></button>
+                        <button class="action-btn" title="Comment"><i class="uil uil-comment"></i> ${log.comments?.length || 0}</button>
+                        <button class="action-btn" title="Repost"><i class="uil uil-repeat"></i></button>
+                    </div>
 
+                    <div class="feed-comments">
+                        ${commentsHtml}
+                        <div class="comment-input-wrapper">
+                             <input type="text" class="retro-input-mini" placeholder="Add a comment..." 
+                                   onkeydown="if(event.key==='Enter') window.postComment(${log.id}, this)">
+                        </div>
+                    </div>
+                `;
                 dom.feed.appendChild(card);
             });
-        } catch {
-            dom.feed.innerHTML =
-                `<div class="feed-error">Failed to load feed.</div>`;
+        } catch (e) {
+            console.error(e);
+            dom.feed.innerHTML = `<div class="feed-error">Failed to load feed.</div>`;
+        }
+    }
+
+    // Expose for inline handlers
+    window.postComment = async (logId, input) => {
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.disabled = true;
+        const oldPlaceholder = input.placeholder;
+        input.placeholder = "Posting...";
+
+        try {
+            await apiFetch(`/activity/${logId}/comments`, 'POST', { text });
+            input.value = '';
+            renderFeed();
+        } catch (err) {
+            alert(err.message);
+        } finally {
+            input.disabled = false;
+            input.placeholder = oldPlaceholder;
+            input.focus();
+        }
+    };
+
+    /* =========================
+       TIMER SYSTEM
+    ========================= */
+
+    function transitionTimer(newState) {
+        const oldState = state.timer.status;
+
+        switch (newState) {
+            case TimerState.RUNNING:
+                if (oldState === TimerState.IDLE) {
+                    if (state.timer.intervalId) clearInterval(state.timer.intervalId);
+                    state.timer.intervalId = setInterval(tick, 1000);
+                    if (dom.btnStart) dom.btnStart.disabled = true;
+                    if (dom.btnPause) dom.btnPause.disabled = false;
+                    if (dom.btnEnd) dom.btnEnd.disabled = false;
+                } else if (oldState === TimerState.PAUSED) {
+                    if (state.timer.intervalId) clearInterval(state.timer.intervalId);
+                    state.timer.intervalId = setInterval(tick, 1000);
+                    if (dom.btnStart) dom.btnStart.disabled = true;
+                    if (dom.btnPause) dom.btnPause.disabled = false;
+                }
+                break;
+
+            case TimerState.PAUSED:
+                if (oldState === TimerState.RUNNING) {
+                    clearInterval(state.timer.intervalId);
+                    state.timer.intervalId = null;
+                    if (dom.btnStart) {
+                        dom.btnStart.textContent = "RESUME";
+                        dom.btnStart.disabled = false;
+                    }
+                    if (dom.btnPause) dom.btnPause.disabled = true;
+                }
+                break;
+
+            case TimerState.IDLE:
+                if (state.timer.intervalId) clearInterval(state.timer.intervalId);
+                state.timer.intervalId = null;
+                state.timer.seconds = 0;
+                state.timer.sessionData = null;
+                updateTimerUI();
+
+                if (dom.btnStart) {
+                    dom.btnStart.textContent = "START";
+                    dom.btnStart.disabled = false;
+                }
+                if (dom.btnPause) dom.btnPause.disabled = true;
+                if (dom.btnEnd) dom.btnEnd.disabled = true;
+                break;
+        }
+        state.timer.status = newState;
+    }
+
+    function tick() {
+        state.timer.seconds++;
+        updateTimerUI();
+    }
+
+    function updateTimerUI() {
+        if (!dom.timerDisplay) return;
+        const total = state.timer.seconds;
+        const h = Math.floor(total / 3600);
+        const m = Math.floor((total % 3600) / 60);
+        const s = total % 60;
+        dom.timerDisplay.textContent =
+            `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    /* =========================
+       QUESTS & LEADERBOARD
+    ========================= */
+
+    async function renderQuests() {
+        if (!dom.questsContainer) return;
+        dom.questsContainer.innerHTML = '';
+        try {
+            const quests = await apiFetch('/quests');
+            if (!quests.length) {
+                dom.questsContainer.innerHTML = '<div class="retro-panel quest-box"><p>No active quests.</p></div>';
+                return;
+            }
+
+            quests.forEach(q => {
+                const pct = Math.min(100, (q.progress_hours / q.target_hours) * 100);
+                const isComplete = pct >= 100;
+                let actionBtn = '';
+
+                if (!q.joined) {
+                    actionBtn = `<button class="retro-btn small" onclick="window.questAction(${q.id}, 'join')">JOIN</button>`;
+                } else if (isComplete && !q.completed_at) {
+                    actionBtn = `<button class="retro-btn small" onclick="window.questAction(${q.id}, 'claim')">CLAIM</button>`;
+                } else if (q.completed_at) {
+                    actionBtn = `<span style="color:var(--highlight-color)">COMPLETED</span>`;
+                } else {
+                    actionBtn = `<span style="font-size:12px; opacity:0.7">ACTIVE</span>`;
+                }
+
+                const el = document.createElement('div');
+                el.className = 'retro-panel quest-box';
+                el.innerHTML = `
+                    <h3>${q.title}</h3>
+                    <div class="progress-bar-container"><div class="progress-bar" style="width: ${pct}%;"></div></div>
+                    <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                        <span>${q.progress_hours.toFixed(1)} / ${q.target_hours}h</span>
+                        ${actionBtn}
+                    </div>
+                `;
+                dom.questsContainer.appendChild(el);
+            });
+        } catch (e) {
+            dom.questsContainer.innerHTML = `<p class="error">Failed to load quests.</p>`;
+        }
+    }
+
+    window.questAction = async (id, action) => {
+        try {
+            await apiFetch(`/quests/${id}/${action}`, 'POST');
+            await renderQuests();
+            if (action === 'claim') {
+                const user = await apiFetch('/me');
+                hydrateUserUI(user);
+            }
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    async function renderLeaderboard() {
+        if (!dom.leaderboardBody) return;
+        dom.leaderboardBody.innerHTML = '';
+        try {
+            const users = await apiFetch('/leaderboard');
+            users.forEach(u => {
+                const tr = document.createElement('tr');
+                if (u.is_current_user) tr.className = 'highlight';
+                tr.innerHTML = `
+                    <td>${u.rank}</td>
+                    <td>${u.username}${u.is_current_user ? ' (YOU)' : ''}</td>
+                    <td>${(u.xp || 0).toLocaleString()}</td>
+                    <td>${u.total_hours || '0.0'}h</td>
+                    <td class="hide-mobile">${u.streak || 0}</td>
+                `;
+                dom.leaderboardBody.appendChild(tr);
+            });
+        } catch (e) {
+            dom.leaderboardBody.innerHTML = '<tr><td colspan="5">Error loading data</td></tr>';
         }
     }
 
@@ -196,7 +432,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function bindPostProof() {
         dom.btnPostProof?.addEventListener('click', () => {
-            dom.modalPostProof.classList.remove('hidden');
+            if (dom.modalPostProof) dom.modalPostProof.classList.remove('hidden');
+        });
+
+        // Close Buttons for Modals
+        document.querySelectorAll('.close-modal-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modal = btn.closest('.modal-overlay');
+                if (modal) modal.classList.add('hidden');
+            });
         });
 
         dom.formPostProof?.addEventListener('submit', async e => {
@@ -247,8 +491,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* =========================
-       EVENTS
+       EVENTS & INIT
     ========================= */
+
+    function getTimeWindow(date) {
+        const hour = date.getHours();
+        if (hour >= 5 && hour < 11) return 'MORNING';
+        if (hour >= 11 && hour < 17) return 'AFTERNOON';
+        return 'NIGHT';
+    }
 
     function bindEvents() {
         dom.navButtons.forEach(btn => {
@@ -264,15 +515,12 @@ document.addEventListener('DOMContentLoaded', () => {
         bindPostProof();
         bindAvatarUpload();
 
+        // Auth
         dom.authForm?.addEventListener('submit', async e => {
             e.preventDefault();
-
             const username = document.getElementById('auth-username').value.trim();
             const passphrase = document.getElementById('auth-passphrase').value;
-
-            const endpoint = dom.tabRegister.classList.contains('active')
-                ? '/auth/register'
-                : '/auth/login';
+            const endpoint = dom.tabRegister.classList.contains('active') ? '/auth/register' : '/auth/login';
 
             try {
                 const res = await apiFetch(endpoint, 'POST', { username, passphrase });
@@ -284,21 +532,116 @@ document.addEventListener('DOMContentLoaded', () => {
                 dom.authError.textContent = err.message;
             }
         });
-    }
 
-    /* =========================
-       INIT
-    ========================= */
+        // Timer Controls
+        dom.btnStart?.addEventListener('click', () => {
+            if (state.timer.status === TimerState.IDLE) {
+                dom.modalIntent?.classList.remove('hidden');
+            } else if (state.timer.status === TimerState.PAUSED) {
+                transitionTimer(TimerState.RUNNING);
+            }
+        });
+        dom.btnPause?.addEventListener('click', () => transitionTimer(TimerState.PAUSED));
+        dom.btnEnd?.addEventListener('click', () => {
+            transitionTimer(TimerState.PAUSED);
+            dom.modalReflection?.classList.remove('hidden');
+        });
+
+        // Intent Form
+        dom.formIntent?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const type = document.getElementById('intent-type').value;
+            const note = document.getElementById('intent-note').value;
+            state.timer.sessionData = { type, note, startTime: new Date(), timeTag: getTimeWindow(new Date()) };
+            dom.modalIntent.classList.add('hidden');
+            transitionTimer(TimerState.RUNNING);
+        });
+        dom.btnCancelIntent?.addEventListener('click', () => dom.modalIntent.classList.add('hidden'));
+
+        // Reflection
+        dom.reflectionBtns.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const rating = btn.dataset.rating;
+                const session = { ...state.timer.sessionData, duration: state.timer.seconds, rating };
+                try {
+                    await apiFetch('/sessions/end', 'POST', session);
+                    dom.modalReflection.classList.add('hidden');
+                    transitionTimer(TimerState.IDLE);
+                    const user = await apiFetch('/me');
+                    hydrateUserUI(user);
+                    renderFeed();
+                } catch (err) {
+                    alert("Failed to save session: " + err.message);
+                }
+            });
+        });
+
+        // Create Quest
+        dom.btnCreateQuest?.addEventListener('click', () => dom.modalCreateQuest?.classList.remove('hidden'));
+        dom.formCreateQuest?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('quest-title').value.trim();
+            const target = document.getElementById('quest-hours').value;
+            try {
+                await apiFetch('/quests', 'POST', { title, description: title, target_hours: Number(target) });
+                dom.modalCreateQuest.classList.add('hidden');
+                dom.formCreateQuest.reset();
+                renderQuests();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+    }
 
     function initializeSystem(user) {
         hydrateUserUI(user);
         renderFeed();
+        renderQuests();
+        renderLeaderboard();
         switchScreen('home');
     }
 
     function init() {
         bindEvents();
         checkAuth();
+    }
+
+    /* =========================
+       HELPERS
+    ========================= */
+
+    function escapeHtml(text) {
+        if (!text) return text;
+        return text.replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function stringToColor(str) {
+        if (!str) return '#ccc';
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+        return '#' + "00000".substring(0, 6 - c.length) + c;
+    }
+
+    function timeAgo(date) {
+        const seconds = Math.floor((new Date() - date) / 1000);
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + "y";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + "mo";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + "d";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + "h";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + "m";
+        return Math.floor(seconds) + "s";
     }
 
     init();
