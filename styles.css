@@ -6,7 +6,7 @@
     --highlight-color: #ffffff;
     --border-light: #444;
     --border-dark: #000;
-    --font-stack: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-stack: 'Ubuntu', system-ui, -apple-system, sans-serif;
     --btn-face: #c0c0c0;
     --btn-text: #000;
 }
@@ -227,13 +227,11 @@ body {
 
 .progress-bar {
     height: 100%;
-    background: repeating-linear-gradient(
-        45deg,
-        var(--text-color),
-        var(--text-color) 10px,
-        #999 10px,
-        #999 20px
-    );
+    background: repeating-linear-gradient(45deg,
+            var(--text-color),
+            var(--text-color) 10px,
+            #999 10px,
+            #999 20px);
 }
 
 /* Study Screen */
@@ -275,24 +273,7 @@ body {
     color: #fff;
 }
 
-/* Status Bar */
-.status-bar {
-    grid-column: 1 / -1;
-    background-color: #c0c0c0;
-    color: #000;
-    display: flex;
-    align-items: center;
-    padding: 0 10px;
-    gap: 20px;
-    font-size: 16px;
-    border-top: 2px solid #fff;
-    box-shadow: inset 1px 1px 0px #fff;
-}
 
-.status-item {
-    border-right: 1px solid #888;
-    padding-right: 20px;
-}
 
 /* Activity Section */
 .activity-section {
@@ -478,18 +459,23 @@ body {
     0% {
         opacity: 0.97;
     }
+
     5% {
         opacity: 0.95;
     }
+
     10% {
         opacity: 0.9;
     }
+
     15% {
         opacity: 0.95;
     }
+
     20% {
         opacity: 1;
     }
+
     100% {
         opacity: 0.98;
     }
