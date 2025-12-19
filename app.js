@@ -235,14 +235,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function bindEvents() {
-        dom.navButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                dom.screens.forEach(s => s.classList.add('hidden'));
-                document.getElementById(btn.dataset.target).classList.remove('hidden');
-            });
+function bindEvents() {
+    // ---------------- NAVIGATION ----------------
+    dom.navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            dom.screens.forEach(s => s.classList.add('hidden'));
+            document.getElementById(btn.dataset.target).classList.remove('hidden');
+        });
+    });
+
+    // ---------------- AUTH ----------------
+    if (dom.authForm) {
+        let mode = 'login';
+
+        dom.tabLogin?.addEventListener('click', () => {
+            mode = 'login';
+            dom.tabLogin.classList.add('active');
+            dom.tabRegister.classList.remove('active');
+            dom.authError.textContent = '';
+        });
+
+        dom.tabRegister?.addEventListener('click', () => {
+            mode = 'register';
+            dom.tabRegister.classList.add('active');
+            dom.tabLogin.classList.remove('active');
+            dom.authError.textContent = '';
+        });
+
+        dom.authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('auth-username')?.value.trim();
+            const passphrase = document.getElementById('auth-passphrase')?.value;
+
+            if (!username || !passphrase) {
+                dom.authError.textContent = 'Missing credentials';
+                return;
+            }
+
+            try {
+                const endpoint =
+                    mode === 'login' ? '/auth/login' : '/auth/register';
+
+                const res = await apiFetch(endpoint, 'POST', {
+                    username,
+                    passphrase
+                });
+
+                state.token = res.token;
+                state.user = res.user;
+                localStorage.setItem('token', res.token);
+
+                dom.authModal.classList.add('hidden');
+                initializeSystem(res.user);
+            } catch (err) {
+                dom.authError.textContent = err.message;
+            }
         });
     }
+}
+
 
     function init() {
         bindEvents();
