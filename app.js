@@ -24,7 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
             intervalId: null,
             seconds: 0,
             sessionData: null // { type, note, startTime, timeTag }
-        }
+        },
+        localBio: localStorage.getItem('user_bio') || "Boundless curiosity about code."
     };
 
     /* =========================
@@ -49,8 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         profileRank: document.getElementById('profile-rank'),
         profileXP: document.getElementById('profile-xp'),
         profileUsername: document.getElementById('profile-username'),
-        profileAvatar: document.querySelector('.profile-avatar'),
-        profileAvatarImg: document.querySelector('.profile-avatar img'),
+        profileAvatarImg: document.querySelector('.profile-avatar-img'),
         avatarInput: document.getElementById('avatar-upload'),
 
         // Profile Extended Stats
@@ -83,7 +83,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Post Proof
         btnPostProof: document.getElementById('btn-post-proof'),
         modalPostProof: document.getElementById('modal-post-proof'),
-        formPostProof: document.getElementById('form-post-proof')
+        formPostProof: document.getElementById('form-post-proof'),
+
+        // Edit Profile
+        profileBioText: document.getElementById('profile-bio-text'),
+        btnEditProfile: document.getElementById('btn-edit-profile'),
+        modalEditProfile: document.getElementById('modal-edit-profile'),
+        formEditProfile: document.getElementById('form-edit-profile'),
+        editBioInput: document.getElementById('edit-bio-input')
     };
 
     /* =========================
@@ -183,6 +190,11 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         const placeholder = document.querySelector('.avatar-placeholder');
         if (placeholder) placeholder.classList.add('hidden');
+
+        // Hydrate Local Bio
+        if (dom.profileBioText) {
+            dom.profileBioText.textContent = state.localBio;
+        }
     }
 
     /* =========================
