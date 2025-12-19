@@ -304,7 +304,7 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
-    border-bottom: none;
+    border-bottom: 1px solid var(--border-light);
     padding-bottom: 5px;
 }
 
@@ -512,7 +512,7 @@ body {
 .home-header {
     display: flex;
     justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: none;
 }
 
 .screen-title.center {
