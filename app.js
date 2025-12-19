@@ -181,15 +181,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dom.sysXP) dom.sysXP.textContent = (user.xp || 0).toLocaleString();
         if (dom.sysStreak) dom.sysStreak.textContent = user.streak || 0;
 
+        // Force Stock Avatar
+        dom.profileAvatarImg.src = 'default_avatar.png';
+        dom.profileAvatarImg.classList.remove('hidden');
         const placeholder = document.querySelector('.avatar-placeholder');
-        if (user.avatar_url) {
-            dom.profileAvatarImg.src = `${API_URL}${user.avatar_url}`;
-            dom.profileAvatarImg.classList.remove('hidden');
-            if (placeholder) placeholder.classList.add('hidden');
-        } else {
-            dom.profileAvatarImg.classList.add('hidden');
-            if (placeholder) placeholder.classList.remove('hidden');
-        }
+        if (placeholder) placeholder.classList.add('hidden');
     }
 
     /* =========================
@@ -209,9 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('article');
                 card.className = 'feed-card';
 
-                const avatar = log.user.avatar_url
-                    ? `${API_URL}${log.user.avatar_url}`
-                    : '';
+                const avatar = `<img src="default_avatar.png" class="feed-avatar">`;
 
                 const image = log.image_url
                     ? `<img src="${API_URL}${log.image_url}" class="feed-image">`
@@ -219,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 card.innerHTML = `
                     <div class="feed-header">
-                        ${avatar ? `<img src="${avatar}" class="feed-avatar">` : ''}
+                        ${avatar}
                         <div class="feed-user">${log.user.username}</div>
                     </div>
                     <div class="feed-text">${escapeHtml(log.text)}</div>
@@ -428,24 +422,12 @@ document.addEventListener('DOMContentLoaded', () => {
        AVATAR UPLOAD
     ========================= */
 
+    /* =========================
+       AVATAR UPLOAD (DISABLED)
+    ========================= */
+
     function bindAvatarUpload() {
-        dom.profileAvatar?.addEventListener('click', () => {
-            dom.avatarInput.click();
-        });
-
-        dom.avatarInput?.addEventListener('change', async e => {
-            if (!e.target.files[0]) return;
-
-            const fd = new FormData();
-            fd.append('avatar', e.target.files[0]);
-
-            try {
-                const res = await apiFetch('/me/avatar', 'PUT', fd);
-                hydrateUserUI(res);
-            } catch (err) {
-                alert(err.message);
-            }
-        });
+        // Feature removed: Stock avatar enforced.
     }
 
     /* =========================
