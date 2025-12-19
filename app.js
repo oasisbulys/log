@@ -57,80 +57,81 @@ document.addEventListener('DOMContentLoaded', () => {
         formPostProof: document.getElementById('form-post-proof'),
         btnPostProof: document.getElementById('btn-post-proof'),
 
-        // HOME FEED
         feedContainer: document.getElementById('activity-feed')
     };
 
-
+    // ---------------- QUESTS ----------------
     async function renderQuests() {
-    const container = document.getElementById('quests-container');
-    if (!container) return;
+        const container = document.getElementById('quests-container');
+        if (!container) return;
 
-    container.innerHTML = '';
+        container.innerHTML = '';
 
-    try {
-        const quests = await apiFetch('/quests');
+        try {
+            const quests = await apiFetch('/quests');
 
-        if (!quests.length) {
-            container.innerHTML =
-                '<div class="retro-panel quest-box"><p>No active quests.</p></div>';
-            return;
+            if (!quests.length) {
+                container.innerHTML =
+                    '<div class="retro-panel quest-box"><p>No active quests.</p></div>';
+                return;
+            }
+
+            quests.forEach(q => {
+                const pct = Math.min(100, (q.progress_hours / q.target_hours) * 100);
+
+                const el = document.createElement('div');
+                el.className = 'retro-panel quest-box';
+                el.innerHTML = `
+                    <h3>${q.title}</h3>
+                    <p>${q.description}</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width:${pct}%;"></div>
+                    </div>
+                    <p style="font-size:12px">${q.progress_hours.toFixed(1)} / ${q.target_hours}h</p>
+                `;
+                container.appendChild(el);
+            });
+        } catch (err) {
+            container.innerHTML = '<p class="error">Failed to load quests.</p>';
         }
-
-        quests.forEach(q => {
-            const pct = Math.min(100, (q.progress_hours / q.target_hours) * 100);
-
-            const el = document.createElement('div');
-            el.className = 'retro-panel quest-box';
-            el.innerHTML = `
-                <h3>${q.title}</h3>
-                <p>${q.description}</p>
-                <div class="progress-bar-container">
-                    <div class="progress-bar" style="width:${pct}%;"></div>
-                </div>
-                <p style="font-size:12px">${q.progress_hours.toFixed(1)} / ${q.target_hours}h</p>
-            `;
-            container.appendChild(el);
-        };
-    } catch (err) {
-        container.in
-
-
-    async function renderLeaderboard() {
-    const tbody = document.getElementById('leaderboard-body');
-    if (!tbody) return;
-
-    tbody.innerHTML = '';
-
-    try {
-        const users = await apiFetch('/leaderboard');
-
-        if (!users.length) {
-            tbody.innerHTML =
-                '<tr><td colspan="5">Leaderboard unavailable</td></tr>';
-            return;
-        }
-
-        users.forEach(u => {
-            const tr = document.createElement('tr');
-            if (u.is_current_user) tr.classList.add('highlight');
-
-            tr.innerHTML = `
-                <td>${u.rank}</td>
-                <td>${u.username}${u.is_current_user ? ' (YOU)' : ''}</td>
-                <td>${u.xp || 0}</td>
-                <td>${u.total_hours || '0.0'}h</td>
-                <td class="hide-mobile">${u.streak || 0}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    } catch (err) {
-        tbody.innerHTML =
-            '<tr><td colspan="5">Error loading leaderboard</td></tr>';
     }
-}
 
-        
+    // ---------------- LEADERBOARD ----------------
+    async function renderLeaderboard() {
+        const tbody = document.getElementById('leaderboard-body');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+
+        try {
+            const users = await apiFetch('/leaderboard');
+
+            if (!users.length) {
+                tbody.innerHTML =
+                    '<tr><td colspan="5">Leaderboard unavailable</td></tr>';
+                return;
+            }
+
+            users.forEach(u => {
+                const tr = document.createElement('tr');
+                if (u.is_current_user) tr.classList.add('highlight');
+
+                tr.innerHTML = `
+                    <td>${u.rank}</td>
+                    <td>${u.username}${u.is_current_user ? ' (YOU)' : ''}</td>
+                    <td>${u.xp || 0}</td>
+                    <td>${u.total_hours || '0.0'}h</td>
+                    <td class="hide-mobile">${u.streak || 0}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (err) {
+            tbody.innerHTML =
+                '<tr><td colspan="5">Error loading leaderboard</td></tr>';
+        }
+    }
+
+    // ---------------- API ----------------
     async function apiFetch(endpoint, method = 'GET', body = null) {
         const headers = {};
         if (state.token) headers['x-auth-token'] = state.token;
@@ -183,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('sys-streak').textContent = `${user.streak || 0} DAYS`;
     }
 
-    // 🔥 NEW HOME FEED RENDER LOGIC
+    // ---------------- HOME FEED ----------------
     async function renderLog() {
         if (!dom.feedContainer) return;
         dom.feedContainer.innerHTML = '';
@@ -205,13 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? `${API_URL}${log.user.avatar_url}`
                     : 'https://via.placeholder.com/100';
 
-                const subtitle =
-                    log.type === 'SESSION'
-                        ? `studied ${Math.round(log.duration / 60)} minutes`
-                        : log.type === 'PROOF'
-                            ? 'posted a proof'
-                            : 'completed a study session';
-
                 let imageHtml = '';
                 if (log.image_url) {
                     const imgSrc = log.image_url.startsWith('http')
@@ -225,27 +219,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         <img src="${avatar}" class="feed-avatar">
                         <div>
                             <div class="feed-user">${log.user.username}</div>
-                            <div class="feed-meta">${subtitle}</div>
+                            <div class="feed-meta">${log.type}</div>
                         </div>
                     </div>
-
                     <div class="feed-text">${log.text}</div>
                     ${imageHtml}
-
-                    <div class="feed-actions">
-                        <div class="feed-action">♡ ${log.comments?.length || 0} comments</div>
-                        <div class="feed-action">⤴ reflect</div>
-                    </div>
                 `;
 
                 dom.feedContainer.appendChild(card);
             });
-        } catch (err) {
+        } catch {
             dom.feedContainer.innerHTML =
                 `<div class="feed-card">SYSTEM: Failed to load feed</div>`;
         }
     }
-
 
     function bindEvents() {
         dom.navButtons.forEach(btn => {
