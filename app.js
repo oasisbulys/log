@@ -174,9 +174,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dom.profileTotal) dom.profileTotal.textContent = user.total_hours || '0.0';
 
 
+
         // Force Stock Avatar
-        dom.profileAvatarImg.src = 'default_avatar.png';
+        dom.profileAvatarImg.src = 'default_avatar.jpeg';
         dom.profileAvatarImg.classList.remove('hidden');
+        dom.profileAvatarImg.onerror = () => {
+            dom.profileAvatarImg.src = 'default_avatar.jpeg';
+        };
         const placeholder = document.querySelector('.avatar-placeholder');
         if (placeholder) placeholder.classList.add('hidden');
     }
@@ -198,18 +202,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('article');
                 card.className = 'feed-card';
 
-                const avatar = `<img src="default_avatar.png" class="feed-avatar">`;
+                // Avatar with fallback
+                const avatarUrl = log.user.avatar_url ? `${API_URL}${log.user.avatar_url}` : 'default_avatar.jpeg';
+                const avatar = `<img src="${avatarUrl}" class="feed-avatar" onerror="this.src='default_avatar.jpeg'">`;
 
                 const image = log.image_url
                     ? `<img src="${API_URL}${log.image_url}" class="feed-image">`
                     : '';
 
+                // Header Metrics
+                const timeText = formatTimestamp(new Date(log.created_at));
+                const activityText = getActivityText(log);
+
                 card.innerHTML = `
                     <div class="feed-header">
                         ${avatar}
-                        <div class="feed-user">${log.user.username}</div>
+                        <div class="feed-meta-col">
+                            <div class="feed-user">${log.user.username}</div>
+                            <div class="feed-meta">${activityText} · ${timeText}</div>
+                        </div>
                     </div>
-                    <div class="feed-text">${escapeHtml(log.text)}</div>
+                    ${log.text ? `<div class="feed-text">${escapeHtml(log.text)}</div>` : ''}
                     ${image}
                 `;
                 dom.feed.appendChild(card);
@@ -575,6 +588,33 @@ document.addEventListener('DOMContentLoaded', () => {
         interval = seconds / 60;
         if (interval > 1) return Math.floor(interval) + "m";
         return Math.floor(seconds) + "s";
+    }
+
+    function formatTimestamp(date) {
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000); // seconds
+
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+
+        return date.toLocaleDateString();
+    }
+
+    function getActivityText(log) {
+        // Quest Actions
+        if (log.type === 'QUEST_JOIN') return `joined quest: ${log.metadata?.quest_title || 'a quest'}`;
+        if (log.type === 'QUEST_COMPLETE') return `completed quest: ${log.metadata?.quest_title || 'a quest'}`;
+
+        // Session Actions
+        if (log.type === 'SESSION_COMPLETE') {
+            const duration = log.metadata?.duration ? Math.round(log.metadata.duration / 60) : 0;
+            return `completed ${duration}m · ${log.metadata?.type || 'STUDY'}`;
+        }
+
+        // Generic / Fallback
+        return 'posted an update';
     }
 
     init();
