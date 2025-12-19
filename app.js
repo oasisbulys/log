@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p style="font-size:12px">${q.progress_hours.toFixed(1)} / ${q.target_hours}h</p>
             `;
             container.appendChild(el);
-        });
+        };
     } catch (err) {
         container.in
 
