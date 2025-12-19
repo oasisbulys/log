@@ -620,11 +620,44 @@ body {
     }
 
     .log-item {
-        font-size: 12px;
+        padding: 16px 0 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .comments-list {
+        display: none;
     }
 
     .log-meta {
         font-size: 11px;
+        colour:#777;
+        opacity: 0.8;
+    }
+
+    .log-content {
+        line-height: 1.45;
+        font-size: 13px;
+    }
+
+    .log-image-container{
+        max-width: 100%;
+        margin: 8px -12px;
+        border: none;
+        padding: 0;
+    }
+
+    .log-actions {
+        margin-top: 6px;
+        font-size: 12x;
+        color: #888;
+        padding-top: 4px;
+    }
+
+    .proof-img {
+        border-radius: 6px;
     }
 
     .app-container {
@@ -640,6 +673,10 @@ body {
         display: block;
     }
 
+    .log-item:not(:first-child) {
+        margin-top: 6px;
+    }
+
     .sidebar-header {
         display: flex;
         justify-content: space-between;
@@ -647,8 +684,8 @@ body {
     }
 
     #home .activity-log {
-        max-width: 100%;
-        margin: 0;
+        max-width: 600px;
+        margin: 0 auto;
         padding: 12px 0;
     }
 
@@ -687,9 +724,9 @@ body {
     }
 
     .retro-input-mini {
-        min-height: 32px;
+        min-height: 36px;
         padding: 6px 4px;
-        font-size: 12px;
+        font-size: 13px;
     }
 
     .leaderboard-table {
