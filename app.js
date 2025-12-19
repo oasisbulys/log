@@ -241,8 +241,27 @@ function bindEvents() {
         btn.addEventListener('click', () => {
             dom.screens.forEach(s => s.classList.add('hidden'));
             document.getElementById(btn.dataset.target).classList.remove('hidden');
+
+            if (window.innerWidth <=768 && dom.mainNav) {
+                dom.mainNav.classList.remove('open');
+            }
         });
     });
+
+    // ---------------- HAMBURGER MENU ----------------
+if (dom.mobileMenuBtn && dom.mainNav) {
+    dom.mobileMenuBtn.addEventListener('click', () => {
+        dom.mainNav.classList.toggle('open');
+    });
+}
+
+// Close menu on resize (optional but clean)
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768 && dom.mainNav) {
+        dom.mainNav.classList.remove('open');
+    }
+});
+
 
     // ---------------- AUTH ----------------
     if (dom.authForm) {
