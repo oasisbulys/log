@@ -181,9 +181,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dom.sysXP) dom.sysXP.textContent = (user.xp || 0).toLocaleString();
         if (dom.sysStreak) dom.sysStreak.textContent = user.streak || 0;
 
+        const placeholder = document.querySelector('.avatar-placeholder');
         if (user.avatar_url) {
             dom.profileAvatarImg.src = `${API_URL}${user.avatar_url}`;
             dom.profileAvatarImg.classList.remove('hidden');
+            if (placeholder) placeholder.classList.add('hidden');
+        } else {
+            dom.profileAvatarImg.classList.add('hidden');
+            if (placeholder) placeholder.classList.remove('hidden');
         }
     }
 
@@ -202,80 +207,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
             logs.forEach(log => {
                 const card = document.createElement('article');
-                card.className = 'feed-card'; // Reuse app.js styling class if possible, or adapt styling
+                card.className = 'feed-card';
 
-                // Fallback valid avatar or generated color
-                let avatarHtml = '';
-                if (log.user?.avatar_url) {
-                    avatarHtml = `<img src="${API_URL}${log.user.avatar_url}" class="feed-avatar">`;
-                } else {
-                    avatarHtml = `<div class="feed-avatar" style="background:${stringToColor(log.user?.username)}; display:flex; align-items:center; justify-content:center; color:white; font-size:12px;">${(log.user?.username || '?')[0].toUpperCase()}</div>`;
-                }
+                const avatar = log.user.avatar_url
+                    ? `${API_URL}${log.user.avatar_url}`
+                    : '';
 
-                const imageHtml = log.image_url ?
-                    `<div class="feed-image-container"><img src="${API_URL}${log.image_url}" class="feed-image"></div>` : '';
-
-                // Comments
-                const commentsHtml = log.comments ? log.comments.map(c =>
-                    `<div class="comment-item">
-                        <span class="comment-user">${c.user.username}</span> ${escapeHtml(c.text)}
-                    </div>`
-                ).join('') : '';
+                const image = log.image_url
+                    ? `<img src="${API_URL}${log.image_url}" class="feed-image">`
+                    : '';
 
                 card.innerHTML = `
                     <div class="feed-header">
-                        ${avatarHtml}
-                        <div class="feed-meta">
-                            <div class="feed-user">${log.user?.username || 'Unknown'}</div>
-                            <div class="feed-time">${timeAgo(new Date(log.created_at))}</div>
-                        </div>
+                        ${avatar ? `<img src="${avatar}" class="feed-avatar">` : ''}
+                        <div class="feed-user">${log.user.username}</div>
                     </div>
                     <div class="feed-text">${escapeHtml(log.text)}</div>
-                    ${imageHtml}
-                    
-                     <div class="feed-actions">
-                        <button class="action-btn" title="Like"><i class="uil uil-heart"></i></button>
-                        <button class="action-btn" title="Comment"><i class="uil uil-comment"></i> ${log.comments?.length || 0}</button>
-                        <button class="action-btn" title="Repost"><i class="uil uil-repeat"></i></button>
-                    </div>
-
-                    <div class="feed-comments">
-                        ${commentsHtml}
-                        <div class="comment-input-wrapper">
-                             <input type="text" class="retro-input-mini" placeholder="Add a comment..." 
-                                   onkeydown="if(event.key==='Enter') window.postComment(${log.id}, this)">
-                        </div>
-                    </div>
+                    ${image}
                 `;
                 dom.feed.appendChild(card);
             });
         } catch (e) {
-            console.error(e);
             dom.feed.innerHTML = `<div class="feed-error">Failed to load feed.</div>`;
         }
     }
 
-    // Expose for inline handlers
-    window.postComment = async (logId, input) => {
-        const text = input.value.trim();
-        if (!text) return;
-
-        input.disabled = true;
-        const oldPlaceholder = input.placeholder;
-        input.placeholder = "Posting...";
-
-        try {
-            await apiFetch(`/activity/${logId}/comments`, 'POST', { text });
-            input.value = '';
-            renderFeed();
-        } catch (err) {
-            alert(err.message);
-        } finally {
-            input.disabled = false;
-            input.placeholder = oldPlaceholder;
-            input.focus();
-        }
-    };
+    // Expose for inline handlers removed (using pure render logic)
+    window.postComment = null;
 
     /* =========================
        TIMER SYSTEM
