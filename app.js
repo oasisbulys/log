@@ -1,10 +1,14 @@
 /**
- * Retro Study OS - Frontend Controller (v1.6)
- * HOME feed refactor applied
+ * Uncertanity – Frontend Controller (v1.6 FINAL)
+ * Philosophy: readable feed, stable state, zero gimmicks
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     const API_URL = 'https://log-production-449f.up.railway.app';
+
+    /* =========================
+       STATE
+    ========================= */
 
     const TimerState = {
         IDLE: 'IDLE',
@@ -23,11 +27,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    /* =========================
+       DOM
+    ========================= */
+
     const dom = {
         navButtons: document.querySelectorAll('.nav-btn'),
         screens: document.querySelectorAll('.screen'),
-        mobileMenuBtn: document.getElementById('mobile-menu-btn'),
         mainNav: document.getElementById('main-nav'),
+        mobileMenuBtn: document.getElementById('mobile-menu-btn'),
 
         authModal: document.getElementById('modal-auth'),
         authForm: document.getElementById('form-auth'),
@@ -35,108 +43,30 @@ document.addEventListener('DOMContentLoaded', () => {
         tabLogin: document.getElementById('tab-login'),
         tabRegister: document.getElementById('tab-register'),
 
+        feed: document.getElementById('activity-feed'),
+
         profileRank: document.getElementById('profile-rank'),
         profileXP: document.getElementById('profile-xp'),
+        profileUsername: document.getElementById('profile-username'),
         profileAvatar: document.querySelector('.profile-avatar'),
+        profileAvatarImg: document.querySelector('.profile-avatar img'),
         avatarInput: document.getElementById('avatar-upload'),
 
-        timerDisplay: document.getElementById('timer'),
-        btnStart: document.getElementById('btn-start'),
-        btnPause: document.getElementById('btn-pause'),
-        btnEnd: document.getElementById('btn-end'),
-        statusDisplay: document.getElementById('sys-status'),
-
-        modalIntent: document.getElementById('modal-session-intent'),
-        formIntent: document.getElementById('form-session-intent'),
-        btnCancelIntent: document.getElementById('btn-cancel-intent'),
-
-        modalReflection: document.getElementById('modal-reflection'),
-        reflectionBtns: document.querySelectorAll('.reflection-opt'),
-
-        modalPostProof: document.getElementById('modal-post-proof'),
-        formPostProof: document.getElementById('form-post-proof'),
         btnPostProof: document.getElementById('btn-post-proof'),
-
-        feedContainer: document.getElementById('activity-feed')
+        modalPostProof: document.getElementById('modal-post-proof'),
+        formPostProof: document.getElementById('form-post-proof')
     };
 
-    // ---------------- QUESTS ----------------
-    async function renderQuests() {
-        const container = document.getElementById('quests-container');
-        if (!container) return;
+    /* =========================
+       API
+    ========================= */
 
-        container.innerHTML = '';
-
-        try {
-            const quests = await apiFetch('/quests');
-
-            if (!quests.length) {
-                container.innerHTML =
-                    '<div class="retro-panel quest-box"><p>No active quests.</p></div>';
-                return;
-            }
-
-            quests.forEach(q => {
-                const pct = Math.min(100, (q.progress_hours / q.target_hours) * 100);
-
-                const el = document.createElement('div');
-                el.className = 'retro-panel quest-box';
-                el.innerHTML = `
-                    <h3>${q.title}</h3>
-                    <p>${q.description}</p>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" style="width:${pct}%;"></div>
-                    </div>
-                    <p style="font-size:12px">${q.progress_hours.toFixed(1)} / ${q.target_hours}h</p>
-                `;
-                container.appendChild(el);
-            });
-        } catch (err) {
-            dom.feedContainer.innerHTML =
-                '<div class="feed-card">SYSTEM: Failed to load feed</div>';
-        }
-    }
-
-    // ---------------- LEADERBOARD ----------------
-    async function renderLeaderboard() {
-        const tbody = document.getElementById('leaderboard-body');
-        if (!tbody) return;
-
-        tbody.innerHTML = '';
-
-        try {
-            const users = await apiFetch('/leaderboard');
-
-            if (!users.length) {
-                tbody.innerHTML =
-                    '<tr><td colspan="5">Leaderboard unavailable</td></tr>';
-                return;
-            }
-
-            users.forEach(u => {
-                const tr = document.createElement('tr');
-                if (u.is_current_user) tr.classList.add('highlight');
-
-                tr.innerHTML = `
-                    <td>${u.rank}</td>
-                    <td>${u.username}${u.is_current_user ? ' (YOU)' : ''}</td>
-                    <td>${u.xp || 0}</td>
-                    <td>${u.total_hours || '0.0'}h</td>
-                    <td class="hide-mobile">${u.streak || 0}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        } catch (err) {
-            tbody.innerHTML =
-                '<tr><td colspan="5">Error loading leaderboard</td></tr>';
-        }
-    }
-
-    // ---------------- API ----------------
     async function apiFetch(endpoint, method = 'GET', body = null) {
         const headers = {};
         if (state.token) headers['x-auth-token'] = state.token;
-        if (body && !(body instanceof FormData)) headers['Content-Type'] = 'application/json';
+        if (body && !(body instanceof FormData)) {
+            headers['Content-Type'] = 'application/json';
+        }
 
         const res = await fetch(`${API_URL}${endpoint}`, {
             method,
@@ -144,167 +74,210 @@ document.addEventListener('DOMContentLoaded', () => {
             body: body instanceof FormData ? body : body ? JSON.stringify(body) : null
         });
 
-        const data = await res.json();
+        const contentType = res.headers.get('content-type');
+        const data = contentType?.includes('application/json')
+            ? await res.json()
+            : null;
+
         if (!res.ok) {
             if (res.status === 401) logout();
-            throw new Error(data?.error || 'Request failed');
+            throw new Error(data?.error || data?.msg || 'Request failed');
         }
+
         return data;
     }
 
     function logout() {
         localStorage.removeItem('token');
-        window.location.reload();
+        location.reload();
     }
+
+    /* =========================
+       AUTH
+    ========================= */
 
     async function checkAuth() {
         if (!state.token) {
             dom.authModal.classList.remove('hidden');
             return;
         }
-        const user = await apiFetch('/me');
-        state.user = user;
-        dom.authModal.classList.add('hidden');
-        initializeSystem(user);
+
+        try {
+            const user = await apiFetch('/me');
+            state.user = user;
+            dom.authModal.classList.add('hidden');
+            initializeSystem(user);
+        } catch {
+            logout();
+        }
     }
 
-    function initializeSystem(user) {
-        hydrateUserUI(user);
-        renderLog();
-        renderQuests();
-        renderLeaderboard();
-        dom.navButtons.forEach(btn => btn.classList.remove('hidden'));
+    /* =========================
+       NAVIGATION
+    ========================= */
+
+    function switchScreen(target) {
+        dom.screens.forEach(s => {
+            s.classList.toggle('hidden', s.id !== target);
+        });
+
+        dom.navButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.target === target);
+        });
+
+        if (window.innerWidth <= 768) {
+            dom.mainNav?.classList.remove('open');
+        }
     }
+
+    /* =========================
+       USER UI
+    ========================= */
 
     function hydrateUserUI(user) {
-        if (!user) return;
+        dom.profileUsername.textContent = user.username;
         dom.profileRank.textContent = user.rank || 'NOVICE';
         dom.profileXP.textContent = user.xp || 0;
-        document.getElementById('profile-username').textContent = user.username;
-        document.getElementById('sys-xp').textContent = user.xp || 0;
-        document.getElementById('sys-streak').textContent = `${user.streak || 0} DAYS`;
+
+        if (user.avatar_url) {
+            dom.profileAvatarImg.src = `${API_URL}${user.avatar_url}`;
+            dom.profileAvatarImg.classList.remove('hidden');
+        }
     }
 
-    // ---------------- HOME FEED ----------------
-    async function renderLog() {
-        if (!dom.feedContainer) return;
-        dom.feedContainer.innerHTML = '';
+    /* =========================
+       HOME FEED (READING SURFACE)
+    ========================= */
+
+    async function renderFeed() {
+        dom.feed.innerHTML = '';
 
         try {
             const logs = await apiFetch('/activity');
 
             if (!logs.length) {
-                dom.feedContainer.innerHTML =
-                    `<div class="feed-card" style="text-align:center; color:#666;">No activity yet.</div>`;
+                dom.feed.innerHTML =
+                    `<div class="feed-empty">No posts yet.</div>`;
                 return;
             }
 
             logs.forEach(log => {
-                const card = document.createElement('div');
+                const card = document.createElement('article');
                 card.className = 'feed-card';
 
-                const avatar = log.user?.avatar_url
+                const avatar = log.user.avatar_url
                     ? `${API_URL}${log.user.avatar_url}`
-                    : 'https://via.placeholder.com/100';
+                    : '';
 
-                let imageHtml = '';
-                if (log.image_url) {
-                    const imgSrc = log.image_url.startsWith('http')
-                        ? log.image_url
-                        : `${API_URL}${log.image_url}`;
-                    imageHtml = `<img src="${imgSrc}" class="feed-image">`;
-                }
+                const image = log.image_url
+                    ? `<img src="${API_URL}${log.image_url}" class="feed-image">`
+                    : '';
 
                 card.innerHTML = `
                     <div class="feed-header">
-                        <img src="${avatar}" class="feed-avatar">
-                        <div>
-                            <div class="feed-user">${log.user.username}</div>
-                            <div class="feed-meta">${log.type}</div>
-                        </div>
+                        ${avatar ? `<img src="${avatar}" class="feed-avatar">` : ''}
+                        <div class="feed-user">${log.user.username}</div>
                     </div>
                     <div class="feed-text">${log.text}</div>
-                    ${imageHtml}
+                    ${image}
                 `;
 
-                dom.feedContainer.appendChild(card);
+                dom.feed.appendChild(card);
             });
         } catch {
-            dom.feedContainer.innerHTML =
-                `<div class="feed-card">SYSTEM: Failed to load feed</div>`;
+            dom.feed.innerHTML =
+                `<div class="feed-error">Failed to load feed.</div>`;
         }
     }
 
-function bindEvents() {
-    // ---------------- NAVIGATION ----------------
-    dom.navButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            dom.screens.forEach(s => s.classList.add('hidden'));
-            document.getElementById(btn.dataset.target).classList.remove('hidden');
+    /* =========================
+       POST PROOF
+    ========================= */
 
-            if (window.innerWidth <=768 && dom.mainNav) {
-                dom.mainNav.classList.remove('open');
-            }
-        });
-    });
-
-    // ---------------- HAMBURGER MENU ----------------
-if (dom.mobileMenuBtn && dom.mainNav) {
-    dom.mobileMenuBtn.addEventListener('click', () => {
-        dom.mainNav.classList.toggle('open');
-    });
-}
-
-// Close menu on resize (optional but clean)
-window.addEventListener('resize', () => {
-    if (window.innerWidth > 768 && dom.mainNav) {
-        dom.mainNav.classList.remove('open');
-    }
-});
-
-
-    // ---------------- AUTH ----------------
-    if (dom.authForm) {
-        let mode = 'login';
-
-        dom.tabLogin?.addEventListener('click', () => {
-            mode = 'login';
-            dom.tabLogin.classList.add('active');
-            dom.tabRegister.classList.remove('active');
-            dom.authError.textContent = '';
+    function bindPostProof() {
+        dom.btnPostProof?.addEventListener('click', () => {
+            dom.modalPostProof.classList.remove('hidden');
         });
 
-        dom.tabRegister?.addEventListener('click', () => {
-            mode = 'register';
-            dom.tabRegister.classList.add('active');
-            dom.tabLogin.classList.remove('active');
-            dom.authError.textContent = '';
-        });
-
-        dom.authForm.addEventListener('submit', async (e) => {
+        dom.formPostProof?.addEventListener('submit', async e => {
             e.preventDefault();
 
-            const username = document.getElementById('auth-username')?.value.trim();
-            const passphrase = document.getElementById('auth-passphrase')?.value;
+            const text = document.getElementById('proof-text').value.trim();
+            const file = document.getElementById('proof-file').files[0];
 
-            if (!username || !passphrase) {
-                dom.authError.textContent = 'Missing credentials';
-                return;
-            }
+            if (!text) return;
+
+            const fd = new FormData();
+            fd.append('text', text);
+            if (file) fd.append('image', file);
 
             try {
-                const endpoint =
-                    mode === 'login' ? '/auth/login' : '/auth/register';
+                await apiFetch('/activity/proof', 'POST', fd);
+                dom.modalPostProof.classList.add('hidden');
+                dom.formPostProof.reset();
+                renderFeed();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+    }
 
-                const res = await apiFetch(endpoint, 'POST', {
-                    username,
-                    passphrase
-                });
+    /* =========================
+       AVATAR UPLOAD
+    ========================= */
 
+    function bindAvatarUpload() {
+        dom.profileAvatar?.addEventListener('click', () => {
+            dom.avatarInput.click();
+        });
+
+        dom.avatarInput?.addEventListener('change', async e => {
+            if (!e.target.files[0]) return;
+
+            const fd = new FormData();
+            fd.append('avatar', e.target.files[0]);
+
+            try {
+                const res = await apiFetch('/me/avatar', 'PUT', fd);
+                hydrateUserUI(res);
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+    }
+
+    /* =========================
+       EVENTS
+    ========================= */
+
+    function bindEvents() {
+        dom.navButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                switchScreen(btn.dataset.target);
+            });
+        });
+
+        dom.mobileMenuBtn?.addEventListener('click', () => {
+            dom.mainNav?.classList.toggle('open');
+        });
+
+        bindPostProof();
+        bindAvatarUpload();
+
+        dom.authForm?.addEventListener('submit', async e => {
+            e.preventDefault();
+
+            const username = document.getElementById('auth-username').value.trim();
+            const passphrase = document.getElementById('auth-passphrase').value;
+
+            const endpoint = dom.tabRegister.classList.contains('active')
+                ? '/auth/register'
+                : '/auth/login';
+
+            try {
+                const res = await apiFetch(endpoint, 'POST', { username, passphrase });
                 state.token = res.token;
-                state.user = res.user;
                 localStorage.setItem('token', res.token);
-
                 dom.authModal.classList.add('hidden');
                 initializeSystem(res.user);
             } catch (err) {
@@ -312,8 +285,16 @@ window.addEventListener('resize', () => {
             }
         });
     }
-}
 
+    /* =========================
+       INIT
+    ========================= */
+
+    function initializeSystem(user) {
+        hydrateUserUI(user);
+        renderFeed();
+        switchScreen('home');
+    }
 
     function init() {
         bindEvents();
