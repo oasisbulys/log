@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uncertanity</title>
+    <title>Retro Study OS v1.0</title>
     <link rel="stylesheet" href="styles.css">
     <!-- Ubuntu Font -->
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
@@ -112,44 +112,47 @@
             <div id="profile" class="screen hidden">
                 <h1 class="screen-title">USER PROFILE</h1>
                 <div class="retro-panel profile-card">
-                    <div class="profile-header">
-                        <div class="profile-avatar">
-                            <img src="" alt="Avatar" class="hidden">
-                            <div class="avatar-placeholder"
-                                style="width:100px; height:100px; background:#111; border:1px solid #333; display:flex; align-items:center; justify-content:center; color:#666;">
-                                ?</div>
-                            <input type="file" id="avatar-upload" class="hidden" accept="image/*">
+                    <div class="profile-header-new">
+                        <div class="profile-avatar-container">
+                            <img src="" alt="Avatar" class="profile-avatar-img hidden">
+                            <div class="avatar-placeholder hidden">?</div>
                         </div>
-                        <div class="profile-info">
-                            <h2 id="profile-username">--</h2>
-                            <p>RANK: <span id="profile-rank">--</span></p>
+
+                        <div class="profile-info-new">
+                            <div class="profile-top-row">
+                                <h2 id="profile-username">--</h2>
+                                <span class="badge-icon">★</span>
+                            </div>
+
+                            <div class="profile-stats-row">
+                                <div class="stat-pill">
+                                    <span class="stat-num" id="profile-xp">--</span> <span>XP</span>
+                                </div>
+                                <div class="stat-pill">
+                                    <span class="stat-num" id="profile-streak-val">--</span> <span>Streak</span>
+                                </div>
+                                <div class="stat-pill">
+                                    <span class="stat-num" id="profile-total-hours">--</span> <span>Hours</span>
+                                </div>
+                            </div>
+
+                            <div class="profile-bio">
+                                <p id="profile-rank">NOVICE</p>
+                                <p id="profile-bio-text" style="font-size:12px; color:#888;">Boundless curiosity about
+                                    code.</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="profile-stats-grid">
-                        <div class="stat-item">
-                            <label>TODAY'S STUDY</label>
-                            <span id="profile-study-time">--:--:--</span>
-                        </div>
-                        <div class="stat-item">
-                            <label>CURRENT STREAK</label>
-                            <span id="profile-streak-val">--</span>
-                        </div>
-                        <div class="stat-item">
-                            <label>TOTAL XP</label>
-                            <span id="profile-xp">--</span>
-                        </div>
-                        <div class="stat-item">
-                            <label>TOTAL HOURS</label>
-                            <span id="profile-total-hours">--</span>
-                        </div>
+                    <!-- Hidden old stats for JS compatibility if needed, but we reused IDs above -->
+                    <!-- <span id="profile-study-time" class="hidden"></span> -->
+
+                    <div class="profile-actions">
+                        <button id="btn-edit-profile" class="retro-btn outline full-width">Edit Profile</button>
+                        <button class="retro-btn outline full-width">View Archive</button>
                     </div>
 
-
-
-
-
-                    <div class="toggle-group">
+                    <div class="toggle-group" style="margin-top: 20px;">
                         <label class="retro-checkbox">
                             <input type="checkbox" id="terminal-mode-toggle">
                             <span class="checkmark"></span>
