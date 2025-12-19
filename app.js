@@ -92,7 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 container.appendChild(el);
             });
         } catch (err) {
-            container.innerHTML = '<p class="error">Failed to load quests.</p>';
+            dom.feedContainer.innerHTML =
+                '<div class="feed-card">SYSTEM: Failed to load feed</div>';
         }
     }
 
