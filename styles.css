@@ -599,13 +599,18 @@ body {
         padding: 10px 15px;
     }
 
+    .activity-log {
+        padding: 8px 12px;
+    }
+
     .status-bar {
         height: auto;
         min-height: 30px;
-        font-size: 12px;
+        font-size: 11px;
         flex-wrap: wrap;
         gap: 8px;
         padding: 4px 6px;
+        opacity: 0.85;
     }
 
     .status-item {
@@ -620,11 +625,11 @@ body {
     }
 
     .log-item {
-        padding: 16px 0 20px;
+        padding: 14px 0;
         display: flex;
         flex-direction: column;
         gap: 6px;
-        border-bottom: 1px solid rgba(255,255,255,0.12);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
     }
 
     .comments-list {
@@ -634,18 +639,24 @@ body {
     .log-meta {
         font-size: 11px;
         colour:#777;
-        opacity: 0.8;
+        opacity: 0.6;
+        margin-bottom: 4px;
     }
 
     .log-content {
-        line-height: 1.45;
-        font-size: 13px;
+        line-height: 1.5;
+        margin-bottom: 8px;
+        font-size: 14px;
     }
 
     .log-image-container{
         max-width: 100%;
-        margin: 8px -12px;
+        margin: 8px 0;
         border: none;
+        border-radius: 6px;
+        overflow: hidden;
+        text-align: center;
+        display: block;
         padding: 0;
     }
 
@@ -658,6 +669,7 @@ body {
 
     .proof-img {
         border-radius: 6px;
+        margin: auto;
     }
 
     .app-container {
@@ -725,8 +737,13 @@ body {
 
     .retro-input-mini {
         min-height: 36px;
-        padding: 6px 4px;
-        font-size: 13px;
+        padding: 6px 2px;
+        font-size: 12px;
+        opacity: 0.7;
+    }
+
+    .retro-input-mini:focus {
+        opacity: 1;
     }
 
     .leaderboard-table {
