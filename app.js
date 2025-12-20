@@ -125,8 +125,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function logout() {
+        // Clear timer interval to prevent memory leak
+        if (state.timer.intervalId) {
+            clearInterval(state.timer.intervalId);
+            state.timer.intervalId = null;
+        }
         localStorage.removeItem('token');
         location.reload();
+    }
+
+    function showError(message) {
+        // Create error toast
+        const toast = document.createElement('div');
+        toast.className = 'error-toast';
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff4444;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10000;
+            font-family: 'Ubuntu', monospace;
+            max-width: 300px;
+            animation: slideIn 0.3s ease;
+        `;
+        document.body.appendChild(toast);
+
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
 
     /* =========================
@@ -171,10 +204,22 @@ document.addEventListener('DOMContentLoaded', () => {
        USER UI
     ========================= */
 
+    function calculateRank(xp) {
+        if (xp >= 100000) return 'PIRATE KING';
+        if (xp >= 50000) return 'YONKO';
+        if (xp >= 25000) return 'YONKO COMMANDER';
+        if (xp >= 10000) return 'SHICHIBUKAI';
+        return 'SUPERNOVA';
+    }
+
     function hydrateUserUI(user) {
         if (!user) return;
+
+        // Calculate rank based on XP (client-side)
+        const rank = calculateRank(user.xp || 0);
+
         dom.profileUsername.textContent = user.username;
-        dom.profileRank.textContent = user.rank || 'NOVICE';
+        dom.profileRank.textContent = rank;
         dom.profileXP.textContent = (user.xp || 0).toLocaleString();
 
         if (dom.profileStreak) dom.profileStreak.textContent = `${user.streak || 0} Days`;
@@ -373,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await renderFeed();
             }
         } catch (err) {
-            alert(err.message);
+            showError(err.message || 'Quest action failed');
         }
     };
 
@@ -558,7 +603,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     await renderLeaderboard();
                     await renderQuests();
                 } catch (err) {
-                    alert("Failed to save session: " + err.message);
+                    showError('Failed to save session: ' + (err.message || 'Unknown error'));
                 }
             });
         });
