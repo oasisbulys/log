@@ -74,6 +74,24 @@ router.get('/', auth, async (req, res) => {
         user.total_hours = (totalSeconds / 3600).toFixed(1);
         user.today_hours = (todaySeconds / 3600).toFixed(1);
 
+        // Sync Rank with Database (One Piece System)
+        const calculateRank = (xp) => {
+            if (xp >= 100000) return 'PIRATE KING';
+            if (xp >= 50000) return 'YONKO';
+            if (xp >= 25000) return 'YONKO COMMANDER';
+            if (xp >= 10000) return 'SHICHIBUKAI';
+            return 'SUPERNOVA';
+        };
+
+        const currentRank = calculateRank(user.xp || 0);
+        if (user.rank !== currentRank) {
+            await prisma.user.update({
+                where: { id: req.user.id },
+                data: { rank: currentRank }
+            });
+            user.rank = currentRank;
+        }
+
         res.json(user);
     } catch (err) {
         console.error(err.message);
