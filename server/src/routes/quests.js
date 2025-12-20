@@ -52,10 +52,14 @@ router.post('/', auth, async (req, res) => {
             return res.status(400).json({ error: 'Invalid quest data' });
         }
 
+        // Sanitize user input
+        const sanitizedTitle = title.replace(/[<>]/g, '').trim();
+        const sanitizedDescription = (description || title).replace(/[<>]/g, '').trim();
+
         const quest = await prisma.quest.create({
             data: {
-                title,
-                description: description || title,
+                title: sanitizedTitle,
+                description: sanitizedDescription,
                 target_hours,
                 xp_reward: Math.floor(target_hours * 100)
             }
@@ -66,7 +70,7 @@ router.post('/', auth, async (req, res) => {
             data: {
                 userId: req.user.id,
                 type: 'QUEST',
-                text: `created quest: ${quest.title}`
+                text: `created quest: ${sanitizedTitle}`
             }
         });
 
@@ -112,11 +116,18 @@ router.post('/:id/join', auth, async (req, res) => {
             where: { id: questId }
         });
 
+        if (!quest) {
+            return res.status(404).json({ msg: 'Quest not found' });
+        }
+
+        // Sanitize quest title for activity log
+        const sanitizedTitle = quest.title.replace(/[<>]/g, '');
+
         await prisma.activityLog.create({
             data: {
                 userId: req.user.id,
                 type: 'QUEST',
-                text: `joined quest: ${quest.title}`
+                text: `joined quest: ${sanitizedTitle}`
             }
         });
 
@@ -137,6 +148,15 @@ router.post('/:id/claim', auth, async (req, res) => {
     try {
         const questId = parseInt(req.params.id, 10);
 
+        // Validate quest exists first
+        const quest = await prisma.quest.findUnique({
+            where: { id: questId }
+        });
+
+        if (!quest) {
+            return res.status(404).json({ msg: 'Quest not found' });
+        }
+
         const progress = await prisma.questProgress.findUnique({
             where: {
                 userId_questId: {
@@ -154,36 +174,54 @@ router.post('/:id/claim', auth, async (req, res) => {
             return res.status(400).json({ msg: 'Already claimed' });
         }
 
-        const quest = await prisma.quest.findUnique({
-            where: { id: questId }
-        });
-
         if (progress.progress_hours < quest.target_hours) {
             return res.status(400).json({ msg: 'Quest not complete' });
         }
 
-        await prisma.$transaction([
-            prisma.questProgress.update({
-                where: { id: progress.id },
+        // Use atomic conditional update to prevent race condition
+        const updateResult = await prisma.$transaction(async (tx) => {
+            // Try to update only if not already claimed (race condition prevention)
+            const updated = await tx.questProgress.updateMany({
+                where: {
+                    id: progress.id,
+                    completed_at: null // Only update if still unclaimed
+                },
                 data: { completed_at: new Date() }
-            }),
-            prisma.user.update({
+            });
+
+            // If no rows updated, someone else claimed it first
+            if (updated.count === 0) {
+                throw new Error('ALREADY_CLAIMED');
+            }
+
+            // Grant XP
+            await tx.user.update({
                 where: { id: req.user.id },
                 data: {
                     xp: { increment: quest.xp_reward }
                 }
-            }),
-            prisma.activityLog.create({
+            });
+
+            // Sanitize quest title for activity log
+            const sanitizedTitle = quest.title.replace(/[<>]/g, '');
+
+            // Create activity log
+            await tx.activityLog.create({
                 data: {
                     userId: req.user.id,
                     type: 'QUEST',
-                    text: `completed quest: ${quest.title} [+${quest.xp_reward} XP]`
+                    text: `completed quest: ${sanitizedTitle} [+${quest.xp_reward} XP]`
                 }
-            })
-        ]);
+            });
+
+            return true;
+        });
 
         res.json({ msg: 'Reward claimed' });
     } catch (err) {
+        if (err.message === 'ALREADY_CLAIMED') {
+            return res.status(400).json({ msg: 'Already claimed' });
+        }
         console.error('CLAIM QUEST ERROR:', err);
         res.status(500).json({ error: 'Server Error' });
     }
