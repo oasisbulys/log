@@ -32,7 +32,7 @@ router.post('/register', async (req, res) => {
                 username,
                 passphrase_hash,
                 xp: 0,
-                rank: 'NOVICE',
+                rank: 'ѕυρєяησνα',
                 streak: 0
             }
         });
