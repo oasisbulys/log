@@ -20,11 +20,22 @@ router.get('/', auth, async (req, res) => {
             }
         });
 
-        // Add rank
-        const leaderboard = users.map((u, index) => ({
-            ...u,
-            rank: index + 1,
-            is_current_user: u.id === req.user.id
+        // Calculate total hours for each user
+        const leaderboard = await Promise.all(users.map(async (u, index) => {
+            const totalSessions = await prisma.studySession.aggregate({
+                _sum: { duration_seconds: true },
+                where: { userId: u.id }
+            });
+
+            const totalSeconds = totalSessions._sum.duration_seconds || 0;
+            const total_hours = (totalSeconds / 3600).toFixed(1);
+
+            return {
+                ...u,
+                rank: index + 1,
+                is_current_user: u.id === req.user.id,
+                total_hours
+            };
         }));
 
         res.json(leaderboard);
