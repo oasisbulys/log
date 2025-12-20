@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="feed-header">
                         ${avatar}
                         <div class="feed-meta-col">
-                            <div class="feed-user">${log.user.username}</div>
+                            <div class="feed-user">${escapeHtml(log.user.username)}</div>
                             <div class="feed-meta">${activityText} · ${timeText}</div>
                         </div>
                     </div>
@@ -245,8 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Expose for inline handlers removed (using pure render logic)
-    window.postComment = null;
+
 
     /* =========================
        TIMER SYSTEM
@@ -348,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const el = document.createElement('div');
                 el.className = 'retro-panel quest-box';
                 el.innerHTML = `
-                    <h3>${q.title} <span style="color:var(--highlight-color); font-size:14px;">[+${q.xp_reward} XP]</span></h3>
+                    <h3>${escapeHtml(q.title)} <span style="color:var(--highlight-color); font-size:14px;">[+${q.xp_reward} XP]</span></h3>
                     <div class="progress-bar-container"><div class="progress-bar" style="width: ${pct}%;"></div></div>
                     <div style="display:flex; justify-content:space-between; margin-top:10px;">
                         <span>${q.progress_hours.toFixed(1)} / ${q.target_hours}h</span>
@@ -388,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (u.is_current_user) tr.className = 'highlight';
                 tr.innerHTML = `
                     <td>${u.rank}</td>
-                    <td>${u.username}${u.is_current_user ? ' (YOU)' : ''}</td>
+                    <td>${escapeHtml(u.username)}${u.is_current_user ? ' (YOU)' : ''}</td>
                     <td>${(u.xp || 0).toLocaleString()}</td>
                     <td>${u.total_hours || '0.0'}h</td>
                     <td class="hide-mobile">${u.streak || 0}</td>
@@ -600,12 +599,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function escapeHtml(text) {
         if (!text) return text;
-        return text.replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
+
+
 
     function stringToColor(str) {
         if (!str) return '#ccc';
