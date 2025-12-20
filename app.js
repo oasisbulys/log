@@ -348,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const el = document.createElement('div');
                 el.className = 'retro-panel quest-box';
                 el.innerHTML = `
-                    <h3>${q.title}</h3>
+                    <h3>${q.title} <span style="color:var(--highlight-color); font-size:14px;">[+${q.xp_reward} XP]</span></h3>
                     <div class="progress-bar-container"><div class="progress-bar" style="width: ${pct}%;"></div></div>
                     <div style="display:flex; justify-content:space-between; margin-top:10px;">
                         <span>${q.progress_hours.toFixed(1)} / ${q.target_hours}h</span>
@@ -367,8 +367,11 @@ document.addEventListener('DOMContentLoaded', () => {
             await apiFetch(`/quests/${id}/${action}`, 'POST');
             await renderQuests();
             if (action === 'claim') {
+                // Refetch all data to update UI
                 const user = await apiFetch('/me');
                 hydrateUserUI(user);
+                await renderLeaderboard();
+                await renderFeed();
             }
         } catch (err) {
             alert(err.message);
@@ -548,9 +551,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     await apiFetch('/sessions/end', 'POST', session);
                     dom.modalReflection.classList.add('hidden');
                     transitionTimer(TimerState.IDLE);
+
+                    // Refetch all data to update UI
                     const user = await apiFetch('/me');
                     hydrateUserUI(user);
-                    renderFeed();
+                    await renderFeed();
+                    await renderLeaderboard();
+                    await renderQuests();
                 } catch (err) {
                     alert("Failed to save session: " + err.message);
                 }
