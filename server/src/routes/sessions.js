@@ -52,6 +52,23 @@ router.post('/end', auth, async (req, res) => {
         }
       });
 
+      // 2.5 Recalculate Rank
+      const updatedUser = await tx.user.findUnique({ where: { id: req.user.id } });
+      const calculateRank = (xp) => {
+        if (xp >= 100000) return 'PIRATE KING';
+        if (xp >= 50000) return 'YONKO';
+        if (xp >= 25000) return 'YONKO COMMANDER';
+        if (xp >= 10000) return 'SHICHIBUKAI';
+        return 'SUPERNOVA';
+      };
+      const newRank = calculateRank(updatedUser.xp);
+      if (updatedUser.rank !== newRank) {
+        await tx.user.update({
+          where: { id: req.user.id },
+          data: { rank: newRank }
+        });
+      }
+
       // 3. Update all active quest progress
       const activeQuests = await tx.questProgress.findMany({
         where: {
